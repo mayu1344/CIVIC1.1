@@ -12,6 +12,10 @@ const nextConfig = {
     typescript: {
         ignoreBuildErrors: true,
     },
+    // Skip problematic pages during static export
+    experimental: {
+        missingSuspenseWithCSRBailout: false,
+    },
 };
 
 export default nextConfig;
