@@ -5,7 +5,7 @@ const nextConfig = {
         unoptimized: true,
     },
     basePath: '/CIVIC1.1',
-    assetPrefix: '/CIVIC1.1',
+    assetPrefix: '/CIVIC1.1/',
     eslint: {
         ignoreDuringBuilds: true,
     },

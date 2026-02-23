@@ -19,7 +19,9 @@ const HISTORY_MOCK = [
 
 import { complaintService } from "@/lib/services/complaint.service";
 
-export default function TrackPage() {
+import { Suspense } from "react";
+
+function TrackContent() {
     const searchParams = useSearchParams();
     const [searchInput, setSearchInput] = useState(searchParams?.get("id") || "");
     const [searched, setSearched] = useState(false);
@@ -196,5 +198,13 @@ export default function TrackPage() {
                 )}
             </div>
         </CitizenLayout>
+    );
+}
+
+export default function TrackPage() {
+    return (
+        <Suspense fallback={<div className="p-20 text-center font-bold text-gray-400">Loading tracking system...</div>}>
+            <TrackContent />
+        </Suspense>
     );
 }
