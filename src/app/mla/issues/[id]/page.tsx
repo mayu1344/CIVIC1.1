@@ -1,3 +1,4 @@
+// Dynamic route page for MLA issue details
 "use client";
 
 import { useEffect, useState } from "react";
