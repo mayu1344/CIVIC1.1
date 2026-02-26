@@ -218,7 +218,7 @@ export default function ReportPage() {
             <div className="max-w-3xl mx-auto">
                 {/* Back Button */}
                 <div className="mb-6">
-                    <Link href="/citizen">
+                    <Link href="/">
                         <Button variant="outline" className="flex items-center gap-2">
                             <ArrowLeft className="w-4 h-4" />
                             Back to Home
