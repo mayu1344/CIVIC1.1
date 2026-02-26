@@ -104,23 +104,6 @@ export default function CitizenHome() {
                             <p className="text-blue-100 text-lg leading-relaxed mb-8 max-w-lg">
                                 Report civic issues directly to your MLA's office. Track every complaint from submission to resolution with real-time updates.
                             </p>
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <Link
-                                    href="/citizen/report"
-                                    className="btn-orange text-base px-6 py-3 rounded-xl shadow-glow-orange"
-                                >
-                                    <FileText className="w-4 h-4" />
-                                    Report an Issue
-                                    <ArrowRight className="w-4 h-4" />
-                                </Link>
-                                <Link
-                                    href="/citizen/track"
-                                    className="inline-flex items-center gap-2 bg-white/10 text-white px-6 py-3 rounded-xl border border-white/20 hover:bg-white/20 transition-colors text-base font-semibold"
-                                >
-                                    <Search className="w-4 h-4" />
-                                    Track My Complaint
-                                </Link>
-                            </div>
                         </div>
 
                         {/* Right — Stats Cards */}

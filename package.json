@@ -5,6 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:officer": "next dev -p 3001",
+    "dev:admin": "next dev -p 3002",
+    "dev:mla": "next dev -p 3003",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

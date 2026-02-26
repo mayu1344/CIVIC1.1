@@ -108,7 +108,7 @@ export default function ComplaintsPage() {
                 {/* Table */}
                 <div className="civic-card overflow-hidden">
                     <div className="overflow-x-auto custom-scrollbar">
-                        <table className="data-table min-w-[900px]">
+                        <table className="data-table min-w-[1100px]">
                             <thead>
                                 <tr>
                                     <th>
@@ -120,7 +120,9 @@ export default function ComplaintsPage() {
                                         />
                                     </th>
                                     <th>Complaint ID</th>
-                                    <th>Citizen / Issue</th>
+                                    <th>Citizen Name</th>
+                                    <th>Mobile</th>
+                                    <th>Issue</th>
                                     <th>Category</th>
                                     <th>Priority</th>
                                     <th>Status</th>
@@ -132,7 +134,7 @@ export default function ComplaintsPage() {
                             <tbody>
                                 {paginated.length === 0 ? (
                                     <tr>
-                                        <td colSpan={9} className="text-center py-12 text-gray-400">
+                                        <td colSpan={11} className="text-center py-12 text-gray-400">
                                             <Search className="w-8 h-8 mx-auto mb-2 opacity-30" />
                                             <p className="text-sm">No complaints match your filters</p>
                                         </td>
@@ -162,9 +164,14 @@ export default function ComplaintsPage() {
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <p className="font-semibold text-gray-800 text-xs">{c.citizenName}</p>
-                                                    <p className="text-gray-400 text-xs truncate max-w-[180px]">{truncate(c.title, 40)}</p>
-                                                    <p className="text-gray-300 text-xs">{c.ward}</p>
+                                                    <p className="font-semibold text-gray-800 text-sm">{c.citizenName}</p>
+                                                </td>
+                                                <td>
+                                                    <p className="font-mono text-xs text-gray-600">{c.citizenMobile}</p>
+                                                </td>
+                                                <td>
+                                                    <p className="text-gray-700 text-xs truncate max-w-[200px]">{truncate(c.title, 50)}</p>
+                                                    <p className="text-gray-400 text-xs">{c.ward}</p>
                                                 </td>
                                                 <td>
                                                     <span className="text-xs text-gray-600 capitalize">{c.category.replace(/_/g, " ")}</span>

@@ -143,7 +143,7 @@ export default function OfficerProfilePage() {
                         </div>
                     </div>
                 </div>
-            </div>
-        </OfficerLayout>
+                </div>
+            </OfficerLayout>
     );
 }

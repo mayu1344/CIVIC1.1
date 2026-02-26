@@ -65,13 +65,6 @@ export function CitizenLayout({ children }: { children: React.ReactNode }) {
                                 </div>
                             </div>
 
-                            <Link
-                                href="/citizen/report"
-                                className="hidden md:inline-flex items-center gap-2 bg-civic-orange text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-orange-600 transition-colors shadow-glow-orange"
-                            >
-                                Report Issue
-                            </Link>
-
                             <button
                                 onClick={() => setMobileOpen(!mobileOpen)}
                                 className="md:hidden text-white p-2 rounded-lg hover:bg-white/10"
@@ -98,13 +91,6 @@ export function CitizenLayout({ children }: { children: React.ReactNode }) {
                                 {item.label}
                             </Link>
                         ))}
-                        <Link
-                            href="/citizen/report"
-                            onClick={() => setMobileOpen(false)}
-                            className="block mt-2 btn-orange text-center"
-                        >
-                            Report Issue
-                        </Link>
                     </div>
                 )}
             </header>

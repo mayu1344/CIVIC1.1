@@ -31,6 +31,10 @@ const SLA_TREND = [
 export default function MLADashboardPage() {
     const topOfficers = [...MOCK_OFFICERS].sort((a, b) => b.performanceScore - a.performanceScore).slice(0, 3);
 
+    const handleLogout = () => {
+        window.location.href = "/";
+    };
+
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Navbar */}
@@ -54,27 +58,9 @@ export default function MLADashboardPage() {
                             <Share2 className="w-4 h-4" />
                             Share Stats
                         </button>
-                        <Link href="/admin/login" className="p-2 hover:bg-white/10 rounded-lg transition-colors" title="Logout">
+                        <button onClick={handleLogout} className="p-2 hover:bg-white/10 rounded-lg transition-colors" title="Logout">
                             <LogOut className="w-4 h-4 text-blue-200" />
-                        </Link>
-
-                        {/* MLA Portrait - Right Topmost Corner */}
-                        <div className="ml-2 flex items-center gap-3 pl-3 border-l border-white/10">
-                            <div className="text-right hidden md:block">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-blue-200 leading-none">Your MLA</p>
-                                <p className="text-xs font-bold text-white">Shri. Mahesh Tenginkai</p>
-                            </div>
-                            <div className="w-12 h-12 rounded-full border-2 border-civic-orange shadow-glow-orange overflow-hidden bg-white shrink-0 group cursor-help transition-transform hover:scale-110 active:scale-95">
-                                <img
-                                    src="/static/mla.jpg"
-                                    alt="MLA Mahesh Tenginkai"
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                        e.currentTarget.src = "https://ui-avatars.com/api/?name=Mahesh+Tenginkai&background=f97316&color=fff";
-                                    }}
-                                />
-                            </div>
-                        </div>
+                        </button>
                     </div>
                 </div>
             </header>

@@ -1,18 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output: 'export',
+    // Temporarily disable static export for development
+    // output: 'export',
+    trailingSlash: true,
     images: {
         unoptimized: true,
     },
-    basePath: '/CIVIC1.1',
-    assetPrefix: '/CIVIC1.1/',
+    basePath: process.env.NODE_ENV === 'production' && process.env.STATIC_EXPORT === 'true' ? '/CIVIC1.1' : '',
+    assetPrefix: process.env.NODE_ENV === 'production' && process.env.STATIC_EXPORT === 'true' ? '/CIVIC1.1/' : '',
     eslint: {
         ignoreDuringBuilds: true,
     },
     typescript: {
         ignoreBuildErrors: true,
     },
-    // Skip problematic pages during static export
     experimental: {
         missingSuspenseWithCSRBailout: false,
     },

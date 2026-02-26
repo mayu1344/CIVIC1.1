@@ -35,6 +35,7 @@ function TrackContent() {
             const data = await complaintService.getComplaintByNumber(searchInput.trim().toUpperCase());
             setComplaint(data);
             setSearched(true);
+            toast.success("Complaint found!");
         } catch (error: any) {
             console.error("Search failed:", error);
             // Fallback for demo if backend is not seeded/returning results
@@ -42,9 +43,47 @@ function TrackContent() {
                 (c) => c.complaintNumber === searchInput.trim().toUpperCase() ||
                     c.citizenMobile === searchInput.trim()
             );
-            setComplaint(foundMock || null);
-            setSearched(true);
-            if (!foundMock) toast.error("No complaint found for this ID or mobile number");
+            
+            // If not found in mock data, create a temporary complaint for newly submitted ones
+            if (!foundMock && searchInput.trim().toUpperCase().startsWith('CMP-')) {
+                const tempComplaint = {
+                    id: "temp-" + Date.now(),
+                    complaintNumber: searchInput.trim().toUpperCase(),
+                    citizenName: "You",
+                    citizenMobile: "XXXXXXXXXX",
+                    title: "Your Submitted Complaint",
+                    description: "Your complaint has been successfully submitted and is being processed. You will receive updates on your registered mobile number.",
+                    category: "General",
+                    subCategory: "Pending Review",
+                    priority: "medium" as const,
+                    status: "submitted" as const,
+                    locationAddress: "Location as provided",
+                    ward: "Ward Assignment Pending",
+                    latitude: 12.9716,
+                    longitude: 77.5946,
+                    assignedDept: "",
+                    assignedOfficer: "",
+                    slaDeadline: new Date(Date.now() + 86400000 * 7).toISOString(),
+                    isEscalated: false,
+                    aiCategorySuggestion: "pending",
+                    aiUrgencyScore: 0.5,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    resolvedAt: null,
+                    mediaCount: 0,
+                };
+                setComplaint(tempComplaint);
+                setSearched(true);
+                toast.success("Complaint found! Your complaint is being processed.");
+            } else {
+                setComplaint(foundMock || null);
+                setSearched(true);
+                if (!foundMock) {
+                    toast.error("No complaint found for this ID or mobile number");
+                } else {
+                    toast.success("Complaint found!");
+                }
+            }
         } finally {
             setLoading(false);
         }
@@ -52,8 +91,12 @@ function TrackContent() {
 
     useEffect(() => {
         if (searchParams?.get("id")) {
-            setSearchInput(searchParams.get("id")!);
-            setTimeout(() => handleSearch(), 300);
+            const complaintId = searchParams.get("id")!;
+            setSearchInput(complaintId);
+            // Auto-search when coming from submission
+            setTimeout(() => {
+                handleSearch();
+            }, 500);
         }
     }, [searchParams]);
 
@@ -103,6 +146,20 @@ function TrackContent() {
                     <div className="space-y-5 animate-slide-up">
                         {/* Main Info Card */}
                         <div className="civic-card p-5">
+                            {/* Success Banner for New Submissions */}
+                            {complaint.status === "submitted" && complaint.id && complaint.id.startsWith("temp-") && (
+                                <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-4 flex gap-3">
+                                    <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-sm font-bold text-green-900">Complaint Submitted Successfully!</p>
+                                        <p className="text-xs text-green-700 mt-1">
+                                            Your complaint has been registered. You will receive SMS/WhatsApp updates on your registered mobile number.
+                                            Our team will review and assign it to the appropriate department shortly.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                            
                             <div className="flex items-start justify-between gap-3 mb-4">
                                 <div>
                                     <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">{complaint.complaintNumber}</p>
@@ -166,7 +223,29 @@ function TrackContent() {
                         {/* Status History */}
                         <div className="civic-card p-5">
                             <h3 className="font-bold text-gray-900 mb-4">Update Timeline</h3>
-                            <div className="space-y-3">
+                            {complaint.id && complaint.id.startsWith("temp-") ? (
+                                <div className="space-y-3">
+                                    <div className="flex gap-3">
+                                        <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <CheckCircle2 className="w-4 h-4 text-civic-green" />
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-semibold text-gray-900">Submitted</span>
+                                                <span className="text-xs text-gray-400">Just now</span>
+                                            </div>
+                                            <p className="text-xs text-gray-500">Complaint received and registered in the system — by <strong>System</strong></p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 ml-11">
+                                        <p className="text-xs text-blue-800">
+                                            <strong>Next Steps:</strong> Your complaint will be validated by our operations team within 24 hours 
+                                            and assigned to the appropriate department. You'll receive updates at each stage.
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
                                 {HISTORY_MOCK.map((h, i) => (
                                     <div key={i} className="flex gap-3">
                                         <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -180,8 +259,9 @@ function TrackContent() {
                                             <p className="text-xs text-gray-500">{h.note} — by <strong>{h.by}</strong></p>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* Help */}

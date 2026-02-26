@@ -93,7 +93,7 @@ export default function OfficerDashboardPage() {
                                         sla.isBreached && "border-red-200 bg-red-50/30"
                                     )}
                                 >
-                                    <div className="flex items-start justify-between gap-2 mb-2">
+                                    <div className="flex items-start justify-between gap-2 mb-3">
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="text-xs font-mono text-gray-400">{c.complaintNumber}</span>
@@ -104,7 +104,18 @@ export default function OfficerDashboardPage() {
                                         <ChevronRight className="w-4 h-4 text-gray-300 flex-shrink-0 mt-1" />
                                     </div>
 
-                                    <div className="flex items-center gap-2 mt-2">
+                                    <div className="bg-gray-50 rounded-lg p-2.5 mb-3 space-y-1">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs text-gray-500">Citizen:</span>
+                                            <span className="text-xs font-bold text-gray-800">{c.citizenName}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs text-gray-500">Mobile:</span>
+                                            <span className="text-xs font-mono text-gray-700">{c.citizenMobile}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 mb-2">
                                         <div className="flex items-center gap-1 text-xs text-gray-500">
                                             <MapPin className="w-3 h-3" /> {c.ward}
                                         </div>
@@ -112,7 +123,7 @@ export default function OfficerDashboardPage() {
                                             <Clock className="w-3 h-3" /> {sla.label}
                                         </div>
                                     </div>
-                                    <div className="mt-2">
+                                    <div>
                                         <StatusBadge status={c.status} />
                                     </div>
                                 </Link>

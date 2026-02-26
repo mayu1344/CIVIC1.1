@@ -21,7 +21,32 @@ export interface CreateComplaintDTO {
 export const complaintService = {
     // Citizen actions
     submitComplaint: async (data: CreateComplaintDTO) => {
-        return api.post('/complaints', data);
+        const formData = new FormData();
+        
+        // Add text fields
+        formData.append('title', data.title);
+        formData.append('description', data.description);
+        formData.append('category', data.category);
+        formData.append('subCategory', data.subCategory);
+        formData.append('priority', data.priority);
+        formData.append('citizenName', data.citizenName);
+        formData.append('citizenMobile', data.citizenMobile);
+        
+        // Add location as JSON string
+        formData.append('location', JSON.stringify(data.location));
+        
+        // Add files if present
+        if (data.attachments && data.attachments.length > 0) {
+            data.attachments.forEach((file) => {
+                formData.append('attachments', file);
+            });
+        }
+        
+        return api.post('/complaints', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     },
 
     getComplaintByNumber: async (complaintNumber: string) => {

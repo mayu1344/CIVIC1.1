@@ -18,6 +18,7 @@ export default function MLAIssuesPage() {
 
         if (activeTab === "all") return matchesSearch;
         if (activeTab === "critical") return matchesSearch && (c.priority === "critical" || c.priority === "high");
+
         if (activeTab === "breached") return matchesSearch && getSLAStatus(c.slaDeadline).isBreached;
         if (activeTab === "resolved") return matchesSearch && c.status === "resolved";
         return matchesSearch;
@@ -110,9 +111,20 @@ export default function MLAIssuesPage() {
                                             {issue.title}
                                         </h3>
 
-                                        <p className="text-xs text-gray-500 line-clamp-2 mb-4 leading-relaxed">
+                                        <p className="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">
                                             {issue.description}
                                         </p>
+
+                                        <div className="bg-gray-50 rounded-lg p-2.5 mb-3">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-xs text-gray-500">Citizen:</span>
+                                                <span className="text-xs font-bold text-gray-800">{issue.citizenName}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs text-gray-500">Mobile:</span>
+                                                <span className="text-xs font-mono text-gray-700">{issue.citizenMobile}</span>
+                                            </div>
+                                        </div>
 
                                         <div className="mt-auto space-y-3">
                                             <div className="flex items-center justify-between">
