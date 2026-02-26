@@ -164,7 +164,7 @@ exports.getAllComplaints = async (req, res, next) => {
         const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
 
         // Get total count
-        const countQuery = `SELECT COUNT(*) FROM complaints ${whereClause}`;
+        const countQuery = `SELECT COUNT(*) FROM complaints c ${whereClause}`;
         const countResult = await pool.query(countQuery, params);
         const total = parseInt(countResult.rows[0].count);
 
