@@ -11,8 +11,9 @@ import { CATEGORIES, SUB_CATEGORIES, PRIORITIES } from "@/lib/constants";
 import { complaintService } from "@/lib/services/complaint.service";
 import { geoService } from "@/lib/services/geo.service";
 import dynamic from "next/dynamic";
-import { MapPin, Upload, X, Loader2, CheckCircle2, Camera } from "lucide-react";
+import { MapPin, Upload, X, Loader2, CheckCircle2, Camera, ArrowLeft } from "lucide-react";
 import { useDropzone } from "react-dropzone";
+import Link from "next/link";
 
 const CivicMap = dynamic(() => import("@/components/ui/CivicMap"), { ssr: false });
 
@@ -215,6 +216,16 @@ export default function ReportPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4">
             <div className="max-w-3xl mx-auto">
+                {/* Back Button */}
+                <div className="mb-6">
+                    <Link href="/citizen">
+                        <Button variant="outline" className="flex items-center gap-2">
+                            <ArrowLeft className="w-4 h-4" />
+                            Back to Home
+                        </Button>
+                    </Link>
+                </div>
+
                 {/* Header */}
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-black text-gray-900 mb-2">Report a Civic Issue</h1>
