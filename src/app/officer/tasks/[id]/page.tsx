@@ -2,6 +2,11 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+
+// Required for static export with dynamic routes
+export function generateStaticParams() {
+    return [];
+}
 import { OfficerLayout } from "@/components/layout/OfficerLayout";
 import { Button } from "@/components/ui/Button";
 import { StatusBadge, PriorityBadge } from "@/components/ui/Badge";
