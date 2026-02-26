@@ -167,7 +167,16 @@ git push -u origin main
 - **Instance Type**: `Free`
 
 ### 3.3 Add Environment Variables
-Click "Advanced" and add:
+
+**EASY METHOD - Bulk Import:**
+1. Click "Advanced" → "Add from .env"
+2. Open file: `backend/.env.render`
+3. Copy entire content
+4. Paste into Render
+5. Click "Save"
+
+**OR Manual Method:**
+Click "Advanced" and add one by one:
 
 ```env
 NODE_ENV=production
@@ -183,8 +192,8 @@ DB_PASSWORD=
 DB_POOL_MIN=2
 DB_POOL_MAX=10
 
-# JWT
-JWT_SECRET=your_super_secret_production_key_change_this_min_32_chars
+# JWT (CHANGE THIS!)
+JWT_SECRET=CHANGE_THIS_TO_RANDOM_32_PLUS_CHARACTERS_STRING
 JWT_EXPIRES_IN=7d
 
 # Cloudinary
@@ -204,6 +213,8 @@ LOG_LEVEL=info
 MAX_FILE_SIZE=5242880
 ALLOWED_FILE_TYPES=image/jpeg,image/png,image/jpg,application/pdf
 ```
+
+**📝 Note**: All these variables are pre-configured in `backend/.env.render` for easy import!
 
 ### 3.4 Deploy
 1. Click "Create Web Service"

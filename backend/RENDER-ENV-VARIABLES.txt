@@ -1,0 +1,205 @@
+RENDER ENVIRONMENT VARIABLES
+============================
+
+Copy and paste these into Render's Environment Variables section.
+After creating your database, update the DB_* values.
+
+---
+
+NODE_ENV=production
+PORT=5000
+API_VERSION=v1
+DB_HOST=
+DB_PORT=5432
+DB_NAME=civicpath
+DB_USER=
+DB_PASSWORD=
+DB_POOL_MIN=2
+DB_POOL_MAX=10
+JWT_SECRET=your_super_secret_production_key_change_this_min_32_chars_make_it_random
+JWT_EXPIRES_IN=7d
+CLOUDINARY_CLOUD_NAME=dredol55o
+CLOUDINARY_API_KEY=442391251121382
+CLOUDINARY_API_SECRET=DzIRRoSb3yDkxbqX1nmnI9OKqWE
+USE_CLOUDINARY=true
+CORS_ORIGIN=http://localhost:3000
+CORS_CREDENTIALS=true
+LOG_LEVEL=info
+MAX_FILE_SIZE=5242880
+ALLOWED_FILE_TYPES=image/jpeg,image/png,image/jpg,application/pdf
+
+---
+
+IMPORTANT NOTES:
+================
+
+1. DB_HOST, DB_USER, DB_PASSWORD - Leave empty initially
+   After creating Render PostgreSQL database:
+   - Copy the Internal Database URL
+   - Extract: host, user, password
+   - Update these variables
+
+2. JWT_SECRET - CHANGE THIS!
+   Generate a random 32+ character string
+   Example: openssl rand -base64 32
+   Or use: https://randomkeygen.com/
+
+3. CORS_ORIGIN - Update after deploying frontend
+   Replace with your actual Render frontend URL
+   Example: https://civicpath.onrender.com
+
+4. Cloudinary credentials are already correct
+   These are your actual working credentials
+
+---
+
+STEP-BY-STEP GUIDE:
+===================
+
+STEP 1: Initial Setup (Before Database)
+----------------------------------------
+Copy all variables above and paste into Render
+Leave DB_HOST, DB_USER, DB_PASSWORD empty
+
+STEP 2: After Creating Database
+--------------------------------
+1. Create PostgreSQL database in Render
+2. Copy "Internal Database URL"
+   Example: postgresql://user:pass@host:5432/civicpath
+3. Extract values:
+   - DB_HOST = host (e.g., dpg-xxxxx.oregon-postgres.render.com)
+   - DB_USER = user (e.g., civicpath_user)
+   - DB_PASSWORD = pass (the password from URL)
+4. Update these 3 variables in Render
+5. Backend will auto-redeploy
+
+STEP 3: After Deploying Frontend
+---------------------------------
+1. Deploy frontend to Render
+2. Copy frontend URL (e.g., https://civicpath.onrender.com)
+3. Update CORS_ORIGIN with this URL
+4. Backend will auto-redeploy
+
+STEP 4: Generate Strong JWT Secret
+-----------------------------------
+Option 1 - Using OpenSSL (if installed):
+  openssl rand -base64 32
+
+Option 2 - Using Node.js:
+  node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+
+Option 3 - Online:
+  Visit: https://randomkeygen.com/
+  Copy a "Fort Knox Password"
+
+Replace JWT_SECRET with the generated value
+
+---
+
+QUICK IMPORT METHOD:
+====================
+
+Render allows bulk import of environment variables!
+
+1. In Render Web Service settings
+2. Click "Environment" tab
+3. Click "Add from .env"
+4. Paste the content from backend/.env.production
+5. Click "Save"
+6. Update DB_* values after creating database
+7. Update CORS_ORIGIN after deploying frontend
+8. Update JWT_SECRET with a strong random value
+
+---
+
+VERIFICATION CHECKLIST:
+=======================
+
+Before deploying, verify:
+☐ NODE_ENV = production
+☐ PORT = 5000
+☐ DB_HOST = (your Render database host)
+☐ DB_USER = (your Render database user)
+☐ DB_PASSWORD = (your Render database password)
+☐ JWT_SECRET = (changed to random 32+ chars)
+☐ CLOUDINARY_CLOUD_NAME = dredol55o
+☐ CLOUDINARY_API_KEY = 442391251121382
+☐ CLOUDINARY_API_SECRET = DzIRRoSb3yDkxbqX1nmnI9OKqWE
+☐ USE_CLOUDINARY = true
+☐ CORS_ORIGIN = (your frontend URL)
+☐ LOG_LEVEL = info
+
+---
+
+SECURITY NOTES:
+===============
+
+✅ DO:
+- Use strong random JWT_SECRET
+- Keep credentials confidential
+- Use HTTPS URLs for CORS_ORIGIN
+- Regularly rotate secrets
+
+❌ DON'T:
+- Use default JWT_SECRET in production
+- Share credentials publicly
+- Use HTTP URLs in production
+- Commit .env files to Git
+
+---
+
+TROUBLESHOOTING:
+================
+
+Issue: Backend can't connect to database
+Fix: Verify DB_HOST, DB_USER, DB_PASSWORD are correct
+     Use "Internal Database URL" not "External"
+
+Issue: CORS errors in frontend
+Fix: Verify CORS_ORIGIN matches your frontend URL exactly
+     Include https:// and no trailing slash
+
+Issue: Images not uploading
+Fix: Verify all CLOUDINARY_* variables are set
+     Check USE_CLOUDINARY=true
+
+Issue: JWT errors
+Fix: Ensure JWT_SECRET is at least 32 characters
+     Same secret must be used across all instances
+
+---
+
+RENDER IMPORT STEPS:
+====================
+
+1. Go to Render dashboard
+2. Select your backend web service
+3. Click "Environment" in left sidebar
+4. Click "Add Environment Variable"
+5. For bulk import:
+   - Click "Add from .env"
+   - Paste content from backend/.env.production
+   - Click "Save"
+6. Or add one by one:
+   - Click "Add Environment Variable"
+   - Enter Key and Value
+   - Repeat for all variables
+
+---
+
+AFTER DEPLOYMENT:
+=================
+
+Test your environment variables:
+1. Visit: https://your-backend.onrender.com/health
+2. Should return: {"status": "OK"}
+3. Check logs for any errors
+4. Test database connection
+5. Test image upload to Cloudinary
+
+---
+
+Need help? Check:
+- DEPLOY-ALL-IN-ONE.md (complete guide)
+- DEPLOY-STEP-BY-STEP.md (detailed steps)
+- Render documentation: https://render.com/docs
