@@ -62,4 +62,67 @@ export default function DeskDashboardPage() {
         },
         { 
             label: "Resolved Today", 
-            v
+            value: stats.resolved, 
+            icon: <CheckCircle2 className="w-5 h-5" />, 
+            color: "bg-green-50 text-green-600",
+            trend: "On track"
+        }
+    ];
+
+    return (
+        <DeskLayout>
+            <div className="space-y-6">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Desk Dashboard</h1>
+                    <p className="text-gray-600">Monitor and manage complaint assignments</p>
+                </div>
+
+                {/* KPI Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {kpiCards.map((kpi, index) => (
+                        <div key={index} className="bg-white rounded-lg shadow p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className={cn("p-2 rounded-lg", kpi.color)}>
+                                    {kpi.icon}
+                                </div>
+                            </div>
+                            <div className="text-3xl font-bold text-gray-900 mb-1">
+                                {kpi.value}
+                            </div>
+                            <div className="text-sm text-gray-600 mb-2">{kpi.label}</div>
+                            <div className="text-xs text-gray-500">{kpi.trend}</div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Recent Complaints */}
+                <div className="bg-white rounded-lg shadow">
+                    <div className="p-6 border-b border-gray-200">
+                        <h2 className="text-lg font-semibold text-gray-900">Recent Complaints</h2>
+                    </div>
+                    <div className="p-6">
+                        <div className="space-y-4">
+                            {MOCK_COMPLAINTS.slice(0, 5).map((complaint) => (
+                                <div key={complaint.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <span className="font-medium text-gray-900">{complaint.complaintNumber}</span>
+                                            <StatusBadge status={complaint.status} />
+                                            <PriorityBadge priority={complaint.priority} />
+                                        </div>
+                                        <p className="text-sm text-gray-600">{complaint.title}</p>
+                                    </div>
+                                    <Link href={`/desk/complaints/${complaint.id}`}>
+                                        <Button variant="outline" size="sm">
+                                            View Details
+                                        </Button>
+                                    </Link>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </DeskLayout>
+    );
+}
