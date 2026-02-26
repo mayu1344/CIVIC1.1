@@ -25,7 +25,7 @@ const server = http.createServer(app);
 // Initialize Socket.io
 const io = new Server(server, {
     cors: {
-        origin: process.env.SOCKET_CORS_ORIGIN || '*',
+        origin: process.env.SOCKET_CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
         credentials: true
     }
 });
@@ -36,8 +36,8 @@ app.set('io', io);
 // Middleware
 app.use(helmet());
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || '*',
-    credentials: true
+    origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
+    credentials: process.env.CORS_CREDENTIALS === 'true'
 }));
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
