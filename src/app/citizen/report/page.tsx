@@ -128,13 +128,26 @@ export default function ReportPage() {
     const startCamera = async () => {
         try {
             const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'environment' } // Use back camera on mobile
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
             });
             setStream(mediaStream);
-            if (videoRef.current) {
-                videoRef.current.srcObject = mediaStream;
-            }
             setShowCamera(true);
+            
+            // Wait for next tick to ensure video element is rendered
+            setTimeout(() => {
+                if (videoRef.current) {
+                    videoRef.current.srcObject = mediaStream;
+                    videoRef.current.play().catch(err => {
+                        console.error("Error playing video:", err);
+                        toast.error("Could not start video playback");
+                    });
+                }
+            }, 100);
+            
             toast.success("Camera started");
         } catch (error) {
             toast.error("Could not access camera. Please check permissions.");
@@ -415,6 +428,7 @@ export default function ReportPage() {
                                                 ref={videoRef}
                                                 autoPlay
                                                 playsInline
+                                                muted
                                                 className="w-full h-[400px] object-cover"
                                             />
                                             <canvas ref={canvasRef} className="hidden" />
