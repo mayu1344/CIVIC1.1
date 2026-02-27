@@ -193,10 +193,26 @@ function TrackContent() {
                                 </div>
                             </div>
 
-                            <div className="flex items-start gap-2 text-sm text-gray-600">
+                            <div className="flex items-start gap-2 text-sm text-gray-600 mb-3">
                                 <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                                 <span>{complaint.locationAddress}</span>
                             </div>
+                            
+                            {/* Get Directions Button */}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full"
+                                leftIcon={<MapPin className="w-4 h-4" />}
+                                onClick={() => {
+                                    const url = `https://www.google.com/maps/dir/?api=1&destination=${complaint.latitude},${complaint.longitude}`;
+                                    window.open(url, '_blank');
+                                    toast.success("Opening Google Maps...");
+                                }}
+                            >
+                                Get Directions to Location
+                            </Button>
+                            
                             <div className="flex items-center gap-2 text-xs text-gray-400 mt-2">
                                 <Clock className="w-3.5 h-3.5" />
                                 Submitted {formatDateTime(complaint.createdAt)}
