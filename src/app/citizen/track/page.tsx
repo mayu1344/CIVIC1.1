@@ -205,7 +205,16 @@ function TrackContent() {
                                 className="w-full"
                                 leftIcon={<MapPin className="w-4 h-4" />}
                                 onClick={() => {
-                                    const url = `https://www.google.com/maps/dir/?api=1&destination=${complaint.latitude},${complaint.longitude}`;
+                                    // Use coordinates if available, otherwise use address
+                                    let url;
+                                    if (complaint.latitude && complaint.longitude && 
+                                        complaint.latitude !== 0 && complaint.longitude !== 0) {
+                                        url = `https://www.google.com/maps/dir/?api=1&destination=${complaint.latitude},${complaint.longitude}`;
+                                    } else {
+                                        // Fallback to address search
+                                        const address = encodeURIComponent(complaint.locationAddress || complaint.location_address || '');
+                                        url = `https://www.google.com/maps/search/?api=1&query=${address}`;
+                                    }
                                     window.open(url, '_blank');
                                     toast.success("Opening Google Maps...");
                                 }}
