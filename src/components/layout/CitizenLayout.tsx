@@ -1,14 +1,23 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CITIZEN_NAV } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { Menu, X, MapPin, Phone, Bell } from "lucide-react";
+import { Menu, X, MapPin, Phone } from "lucide-react";
 import { useState } from "react";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function CitizenLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const { t } = useLanguage();
+
+    const CITIZEN_NAV = [
+        { href: "/citizen", label: t('nav.home') },
+        { href: "/citizen/report", label: t('nav.reportIssue') },
+        { href: "/citizen/track", label: t('nav.trackIssue') },
+        { href: "/public", label: t('nav.publicDashboard') },
+    ];
 
     return (
         <div className="min-h-screen bg-surface-secondary">
@@ -47,8 +56,13 @@ export function CitizenLayout({ children }: { children: React.ReactNode }) {
 
                         {/* Right Side */}
                         <div className="flex items-center gap-3">
-                            {/* MLA Portrait - Top Rightmost Corner */}
-                            <div className="flex items-center gap-2.5 pr-3 border-r border-white/10">
+                            {/* Language Switcher */}
+                            <div className="hidden md:block">
+                                <LanguageSwitcher />
+                            </div>
+
+                            {/* MLA Portrait */}
+                            <div className="flex items-center gap-2.5 pl-3 border-l border-white/10">
                                 <div className="text-right">
                                     <p className="text-[9px] font-black uppercase tracking-widest text-blue-200 leading-none mb-0.5">Your MLA</p>
                                     <p className="text-xs font-bold text-white whitespace-nowrap">Shri. Mahesh Tenginkai</p>
@@ -91,6 +105,10 @@ export function CitizenLayout({ children }: { children: React.ReactNode }) {
                                 {item.label}
                             </Link>
                         ))}
+                        {/* Language Switcher in Mobile Menu */}
+                        <div className="pt-2 border-t border-white/10">
+                            <LanguageSwitcher />
+                        </div>
                     </div>
                 )}
             </header>

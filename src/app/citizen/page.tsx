@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { MOCK_STATS } from "@/lib/mockData";
 import { formatNumber } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const TICKER_STATS = [
     { label: "Issues Resolved", value: "1,532" },
@@ -57,6 +58,7 @@ const RECENT_RESOLUTIONS = [
 ];
 
 export default function CitizenHome() {
+    const { t } = useLanguage();
     const [count, setCount] = useState({ resolved: 0, active: 0 });
     const tickerRef = useRef<HTMLDivElement>(null);
 
@@ -78,6 +80,37 @@ export default function CitizenHome() {
         return () => clearInterval(timer);
     }, []);
 
+    const HOW_IT_WORKS = [
+        {
+            step: "01",
+            icon: <Smartphone className="w-6 h-6" />,
+            title: t('home.howItWorks.step1Title'),
+            description: t('home.howItWorks.step1Desc'),
+            color: "bg-blue-50 text-civic-blue",
+        },
+        {
+            step: "02",
+            icon: <Search className="w-6 h-6" />,
+            title: t('home.howItWorks.step2Title'),
+            description: t('home.howItWorks.step2Desc'),
+            color: "bg-orange-50 text-civic-orange",
+        },
+        {
+            step: "03",
+            icon: <Users className="w-6 h-6" />,
+            title: t('home.howItWorks.step3Title'),
+            description: t('home.howItWorks.step3Desc'),
+            color: "bg-purple-50 text-purple-600",
+        },
+        {
+            step: "04",
+            icon: <CheckCircle className="w-6 h-6" />,
+            title: t('home.howItWorks.step4Title'),
+            description: t('home.howItWorks.step4Desc'),
+            color: "bg-green-50 text-civic-green",
+        },
+    ];
+
     return (
         <CitizenLayout>
             {/* ── HERO ── */}
@@ -95,24 +128,24 @@ export default function CitizenHome() {
                         <div className="animate-slide-up">
                             <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 text-xs font-semibold text-blue-100 mb-6 border border-white/20">
                                 <Shield className="w-3.5 h-3.5 text-civic-orange" />
-                                Powered by Cascade Technologies Solutions
+                                {t('home.hero.poweredBy')}
                             </div>
                             <h1 className="text-4xl md:text-5xl font-black text-white leading-tight text-balance mb-5">
-                                Your Voice for a
-                                <span className="text-civic-orange block">Better Constituency</span>
+                                {t('home.hero.title')}
+                                <span className="text-civic-orange block">{t('home.hero.titleHighlight')}</span>
                             </h1>
                             <p className="text-blue-100 text-lg leading-relaxed mb-8 max-w-lg">
-                                Report civic issues directly to your MLA's office. Track every complaint from submission to resolution with real-time updates.
+                                {t('home.hero.description')}
                             </p>
                         </div>
 
                         {/* Right — Stats Cards */}
                         <div className="grid grid-cols-2 gap-4 animate-fade-in">
                             {[
-                                { label: "Issues Resolved", value: count.resolved.toLocaleString(), icon: <CheckCircle className="w-6 h-6 text-green-400" />, bg: "bg-white/10" },
-                                { label: "Active Issues", value: count.active.toString(), icon: <Clock className="w-6 h-6 text-orange-400" />, bg: "bg-white/10" },
-                                { label: "Avg Resolution", value: "3.2 days", icon: <TrendingUp className="w-6 h-6 text-blue-300" />, bg: "bg-white/10" },
-                                { label: "Satisfaction Rate", value: "94%", icon: <Star className="w-6 h-6 text-yellow-400" />, bg: "bg-white/10" },
+                                { label: t('home.hero.issuesResolved'), value: count.resolved.toLocaleString(), icon: <CheckCircle className="w-6 h-6 text-green-400" />, bg: "bg-white/10" },
+                                { label: t('home.hero.activeIssues'), value: count.active.toString(), icon: <Clock className="w-6 h-6 text-orange-400" />, bg: "bg-white/10" },
+                                { label: t('home.hero.avgResolution'), value: "3.2 days", icon: <TrendingUp className="w-6 h-6 text-blue-300" />, bg: "bg-white/10" },
+                                { label: t('home.hero.satisfactionRate'), value: "94%", icon: <Star className="w-6 h-6 text-yellow-400" />, bg: "bg-white/10" },
                             ].map((s) => (
                                 <div key={s.label} className="glass-dark rounded-2xl p-5 text-white">
                                     {s.icon}
@@ -141,10 +174,10 @@ export default function CitizenHome() {
             {/* ── HOW IT WORKS ── */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
                 <div className="text-center mb-12">
-                    <span className="text-civic-orange text-sm font-bold uppercase tracking-wider">Simple Process</span>
-                    <h2 className="text-3xl md:text-4xl font-black text-gray-900 mt-2">How It Works</h2>
+                    <span className="text-civic-orange text-sm font-bold uppercase tracking-wider">{t('home.howItWorks.subtitle')}</span>
+                    <h2 className="text-3xl md:text-4xl font-black text-gray-900 mt-2">{t('home.howItWorks.title')}</h2>
                     <p className="text-gray-500 mt-3 max-w-xl mx-auto">
-                        Report a civic issue in minutes. We handle the rest — from assignment to resolution.
+                        {t('home.howItWorks.description')}
                     </p>
                 </div>
 
@@ -172,16 +205,16 @@ export default function CitizenHome() {
                     <div className="absolute right-0 top-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4" />
                     <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                         <div>
-                            <h2 className="text-2xl md:text-3xl font-black text-white mb-2">See a problem? Report it now.</h2>
-                            <p className="text-blue-100">Get a unique Complaint ID within seconds and track it in real-time.</p>
+                            <h2 className="text-2xl md:text-3xl font-black text-white mb-2">{t('home.cta.title')}</h2>
+                            <p className="text-blue-100">{t('home.cta.description')}</p>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
                             <Link href="/citizen/report" className="btn-orange px-6 py-3 rounded-xl text-base">
                                 <Upload className="w-4 h-4" />
-                                Report Issue
+                                {t('home.cta.reportButton')}
                             </Link>
                             <Link href="/citizen/track" className="btn-secondary bg-white/10 border-white/30 text-white hover:bg-white/20 px-6 py-3 rounded-xl text-base">
-                                Track Status
+                                {t('home.cta.trackButton')}
                             </Link>
                         </div>
                     </div>
