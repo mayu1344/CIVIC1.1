@@ -213,10 +213,10 @@ exports.getAllComplaints = async (req, res, next) => {
             result.rows.map(async (complaint) => {
                 try {
                     const attachmentsQuery = `
-                        SELECT id, file_url, file_name, file_type, mime_type, file_size_kb, created_at
+                        SELECT id, file_url, file_name, file_type, mime_type, file_size_kb, uploaded_at
                         FROM complaint_attachments
                         WHERE complaint_id = $1
-                        ORDER BY created_at ASC
+                        ORDER BY uploaded_at ASC
                     `;
                     const attachments = await pool.query(attachmentsQuery, [complaint.id]);
                     return {
