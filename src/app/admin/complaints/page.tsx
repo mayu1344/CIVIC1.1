@@ -35,7 +35,8 @@ export default function ComplaintsPage() {
         try {
             setLoading(true);
             setError(null);
-            const response = await fetch('http://localhost:5000/api/complaints');
+            // Use versioned API endpoint
+            const response = await fetch('http://localhost:5000/api/v1/complaints');
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
