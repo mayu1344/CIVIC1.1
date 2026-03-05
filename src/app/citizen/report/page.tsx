@@ -268,33 +268,33 @@ export default function ReportPage() {
                         {/* Step 1: Issue Details */}
                         {step === 1 && (
                             <div className="space-y-5 animate-fade-in">
-                                <h2 className="text-xl font-bold text-gray-900 mb-4">Issue Details</h2>
+                                <h2 className="text-xl font-bold text-gray-900 mb-4">{t('report.issueDetails')}</h2>
                                 
                                 <div>
-                                    <label className="label-field">Issue Title *</label>
+                                    <label className="label-field">{t('report.issueTitle')} *</label>
                                     <input
                                         {...register("title")}
                                         className="input-field"
-                                        placeholder="Brief description of the issue"
+                                        placeholder={t('report.issueTitlePlaceholder')}
                                     />
                                     {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
                                 </div>
 
                                 <div>
-                                    <label className="label-field">Detailed Description *</label>
+                                    <label className="label-field">{t('report.detailedDescription')} *</label>
                                     <textarea
                                         {...register("description")}
                                         className="input-field min-h-[120px]"
-                                        placeholder="Provide detailed information about the issue..."
+                                        placeholder={t('report.detailedDescriptionPlaceholder')}
                                     />
                                     {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="label-field">Category *</label>
+                                        <label className="label-field">{t('report.category')} *</label>
                                         <select {...register("category")} className="input-field">
-                                            <option value="">Select category</option>
+                                            <option value="">{t('report.selectCategory')}</option>
                                             {CATEGORIES.map(cat => (
                                                 <option key={cat.value} value={cat.value}>{cat.label}</option>
                                             ))}
@@ -303,9 +303,9 @@ export default function ReportPage() {
                                     </div>
 
                                     <div>
-                                        <label className="label-field">Sub-Category *</label>
+                                        <label className="label-field">{t('report.subCategory')} *</label>
                                         <select {...register("subCategory")} className="input-field" disabled={!category}>
-                                            <option value="">Select sub-category</option>
+                                            <option value="">{t('report.selectSubCategory')}</option>
                                             {category && SUB_CATEGORIES[category]?.map(sub => (
                                                 <option key={sub} value={sub}>{sub}</option>
                                             ))}
@@ -315,7 +315,7 @@ export default function ReportPage() {
                                 </div>
 
                                 <div>
-                                    <label className="label-field">Priority Level *</label>
+                                    <label className="label-field">{t('report.priority')} *</label>
                                     <div className="grid grid-cols-4 gap-2">
                                         {PRIORITIES.map(p => (
                                             <label key={p} className="cursor-pointer">
@@ -339,7 +339,7 @@ export default function ReportPage() {
                         {step === 2 && (
                             <div className="space-y-5 animate-fade-in">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-xl font-bold text-gray-900">Location</h2>
+                                    <h2 className="text-xl font-bold text-gray-900">{t('report.location')}</h2>
                                     <Button
                                         type="button"
                                         size="sm"
@@ -348,7 +348,7 @@ export default function ReportPage() {
                                         loading={locationLoading}
                                         leftIcon={<MapPin className="w-4 h-4" />}
                                     >
-                                        Use My Location
+                                        {t('report.useCurrentLocation')}
                                     </Button>
                                 </div>
 
@@ -362,11 +362,11 @@ export default function ReportPage() {
                                 </div>
 
                                 <div>
-                                    <label className="label-field">Address *</label>
+                                    <label className="label-field">{t('report.locationAddress')} *</label>
                                     <textarea
                                         {...register("locationAddress")}
                                         className="input-field min-h-[80px]"
-                                        placeholder="Click on map or enter address manually"
+                                        placeholder={t('report.clickMapToSelect')}
                                     />
                                     {errors.locationAddress && <p className="text-red-500 text-xs mt-1">{errors.locationAddress.message}</p>}
                                 </div>
@@ -402,7 +402,7 @@ export default function ReportPage() {
                                                 className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-civic-blue text-white rounded-xl font-semibold hover:bg-navy-700 transition-colors"
                                             >
                                                 <Camera className="w-5 h-5" />
-                                                Take Photo
+                                                {t('report.takePhoto')}
                                             </button>
                                             <div className="flex-1 text-center text-gray-400 flex items-center justify-center">
                                                 or
@@ -418,9 +418,9 @@ export default function ReportPage() {
                                             <input {...getInputProps()} />
                                             <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                                             <p className="text-gray-600 font-medium mb-1">
-                                                {isDragActive ? "Drop files here" : "Drag & drop photos here"}
+                                                {isDragActive ? "Drop files here" : t('report.dragDropPhotos')}
                                             </p>
-                                            <p className="text-gray-400 text-sm">or click to browse (max 5 images)</p>
+                                            <p className="text-gray-400 text-sm">{t('report.orClickToBrowse')}</p>
                                         </div>
                                     </>
                                 ) : (
@@ -442,7 +442,7 @@ export default function ReportPage() {
                                                 className="flex-1"
                                                 leftIcon={<Camera className="w-4 h-4" />}
                                             >
-                                                Capture Photo
+                                                {t('report.capturePhoto')}
                                             </Button>
                                             <Button
                                                 type="button"
@@ -450,7 +450,7 @@ export default function ReportPage() {
                                                 variant="ghost"
                                                 className="flex-1"
                                             >
-                                                Cancel
+                                                {t('common.cancel')}
                                             </Button>
                                         </div>
                                     </div>
@@ -482,24 +482,24 @@ export default function ReportPage() {
                         {/* Step 4: Contact Info */}
                         {step === 4 && (
                             <div className="space-y-5 animate-fade-in">
-                                <h2 className="text-xl font-bold text-gray-900 mb-4">Your Contact Information</h2>
+                                <h2 className="text-xl font-bold text-gray-900 mb-4">{t('report.yourDetails')}</h2>
                                 
                                 <div>
-                                    <label className="label-field">Full Name *</label>
+                                    <label className="label-field">{t('report.yourName')} *</label>
                                     <input
                                         {...register("citizenName")}
                                         className="input-field"
-                                        placeholder="Enter your full name"
+                                        placeholder={t('report.yourName')}
                                     />
                                     {errors.citizenName && <p className="text-red-500 text-xs mt-1">{errors.citizenName.message}</p>}
                                 </div>
 
                                 <div>
-                                    <label className="label-field">Mobile Number *</label>
+                                    <label className="label-field">{t('report.mobileNumber')} *</label>
                                     <input
                                         {...register("citizenMobile")}
                                         className="input-field"
-                                        placeholder="10-digit mobile number"
+                                        placeholder={t('report.mobileNumber')}
                                         maxLength={10}
                                     />
                                     {errors.citizenMobile && <p className="text-red-500 text-xs mt-1">{errors.citizenMobile.message}</p>}
@@ -517,7 +517,7 @@ export default function ReportPage() {
                         {/* Step 5: Terms and Conditions */}
                         {step === 5 && (
                             <div className="space-y-5 animate-fade-in">
-                                <h2 className="text-xl font-bold text-gray-900 mb-4">Terms and Conditions</h2>
+                                <h2 className="text-xl font-bold text-gray-900 mb-4">{t('report.termsAndConditions')}</h2>
                                 
                                 <div className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 max-h-[400px] overflow-y-auto">
                                     <div className="prose prose-sm max-w-none text-gray-700 space-y-4">
@@ -652,14 +652,14 @@ export default function ReportPage() {
                                     variant="ghost"
                                     onClick={() => setStep(step - 1)}
                                 >
-                                    Back
+                                    {t('report.back')}
                                 </Button>
                             )}
                             
                             <div className="ml-auto">
                                 {step < 5 ? (
                                     <Button type="button" onClick={nextStep}>
-                                        Continue
+                                        {t('report.continue')}
                                     </Button>
                                 ) : (
                                     <Button 
@@ -668,7 +668,7 @@ export default function ReportPage() {
                                         disabled={!termsAccepted}
                                         className={!termsAccepted ? "opacity-50 cursor-not-allowed" : ""}
                                     >
-                                        Submit Complaint
+                                        {t('report.submitReport')}
                                     </Button>
                                 )}
                             </div>
