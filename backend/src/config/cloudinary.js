@@ -17,16 +17,13 @@ if (process.env.USE_CLOUDINARY === 'true') {
 const cloudinaryStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
-        // Get citizen info from request body
-        const citizenName = req.body.citizenName || 'unknown';
-        const citizenMobile = req.body.citizenMobile || 'unknown';
-        const complaintTitle = req.body.title || 'complaint';
-        const category = req.body.category || 'general';
+        // Use temporary ID during upload, will be renamed after complaint creation
         const timestamp = Date.now();
+        const randomId = Math.round(Math.random() * 1E9);
+        const category = req.body.category || 'general';
         
-        // Create a clean filename with citizen name
-        const cleanName = citizenName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-        const publicId = `${cleanName}_${citizenMobile}_${timestamp}`;
+        // Create a temporary filename that will be updated after complaint creation
+        const publicId = `temp_${timestamp}_${randomId}`;
         
         return {
             folder: 'civicpath-complaints',
@@ -37,28 +34,70 @@ const cloudinaryStorage = new CloudinaryStorage({
                 { quality: 'auto' },
                 { fetch_format: 'auto' }
             ],
-            // Add searchable tags
+            // Add searchable tags (will be updated after complaint creation)
             tags: [
-                `citizen:${cleanName}`,
-                `mobile:${citizenMobile}`,
                 `category:${category}`,
                 'civicpath',
-                'complaint-image'
+                'complaint-image',
+                'temp-upload'
             ],
-            // Add structured metadata (searchable in Cloudinary)
+            // Add structured metadata (will be updated after complaint creation)
             context: {
-                citizen_name: citizenName,
-                citizen_mobile: citizenMobile,
-                complaint_title: complaintTitle,
                 category: category,
                 upload_date: new Date().toISOString(),
-                uploaded_by: 'citizen'
+                uploaded_by: 'citizen',
+                status: 'pending'
             }
         };
     }
 });
 
+// Function to rename uploaded file with complaint details
+const renameCloudinaryFile = async (oldPublicId, complaintNumber, complaintId, category) => {
+    try {
+        const newPublicId = `${complaintNumber}_${complaintId}_${Date.now()}`;
+        
+        // Rename the file in Cloudinary
+        const result = await cloudinary.uploader.rename(
+            `civicpath-complaints/${oldPublicId}`,
+            `civicpath-complaints/${newPublicId}`,
+            {
+                overwrite: false,
+                invalidate: true
+            }
+        );
+        
+        // Update tags and context
+        await cloudinary.uploader.update_metadata(
+            {
+                complaint_number: complaintNumber,
+                complaint_id: complaintId.toString(),
+                category: category,
+                status: 'active'
+            },
+            [result.public_id]
+        );
+        
+        // Update tags
+        await cloudinary.uploader.add_tag(
+            [`complaint:${complaintNumber}`, `id:${complaintId}`],
+            [result.public_id]
+        );
+        
+        // Remove temp tag
+        await cloudinary.uploader.remove_tag('temp-upload', [result.public_id]);
+        
+        logger.info(`Renamed Cloudinary file: ${oldPublicId} -> ${newPublicId}`);
+        
+        return result.secure_url;
+    } catch (error) {
+        logger.error('Error renaming Cloudinary file:', error);
+        throw error;
+    }
+};
+
 module.exports = {
     cloudinary,
-    cloudinaryStorage
+    cloudinaryStorage,
+    renameCloudinaryFile
 };

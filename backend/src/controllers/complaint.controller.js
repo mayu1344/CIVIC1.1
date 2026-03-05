@@ -1,6 +1,7 @@
 const { pool } = require('../config/database');
 const logger = require('../utils/logger');
 const { AppError } = require('../middleware/error.middleware');
+const { renameCloudinaryFile } = require('../config/cloudinary');
 
 // Create new complaint
 exports.createComplaint = async (req, res, next) => {
@@ -58,11 +59,35 @@ exports.createComplaint = async (req, res, next) => {
 
         // Handle file uploads if present
         if (req.files && req.files.length > 0) {
+            const useCloudinary = process.env.USE_CLOUDINARY === 'true';
+            
             for (const file of req.files) {
                 try {
-                    // Cloudinary files have 'path' property with full URL
-                    // Local files need to construct the URL
-                    const fileUrl = file.path || `/uploads/${file.filename}`;
+                    let fileUrl = file.path || `/uploads/${file.filename}`;
+                    
+                    // If using Cloudinary, rename the file with complaint details
+                    if (useCloudinary && file.path) {
+                        try {
+                            // Extract public_id from Cloudinary path
+                            const urlParts = file.path.split('/');
+                            const fileNameWithExt = urlParts[urlParts.length - 1];
+                            const oldPublicId = fileNameWithExt.split('.')[0];
+                            
+                            // Rename file in Cloudinary
+                            const newUrl = await renameCloudinaryFile(
+                                oldPublicId,
+                                complaintData.complaint_number,
+                                complaintData.id,
+                                category
+                            );
+                            
+                            fileUrl = newUrl;
+                            logger.info(`Cloudinary file renamed for complaint ${complaintData.complaint_number}`);
+                        } catch (renameError) {
+                            logger.warn('Could not rename Cloudinary file, using original:', renameError.message);
+                            // Continue with original URL if rename fails
+                        }
+                    }
                     
                     await pool.query(
                         `INSERT INTO complaint_attachments (complaint_id, file_url, file_name, file_size_kb, mime_type, file_type, uploaded_by_role, uploaded_by_name, uploaded_by_mobile)
