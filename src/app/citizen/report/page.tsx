@@ -507,8 +507,7 @@ export default function ReportPage() {
 
                                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                                     <p className="text-sm text-blue-900">
-                                        <strong>Note:</strong> Your contact information will be used only for updates about this complaint. 
-                                        We respect your privacy and will not share your details with third parties.
+                                        <strong>Note:</strong> {t('report.contactNote')}
                                     </p>
                                 </div>
                             </div>
@@ -521,99 +520,88 @@ export default function ReportPage() {
                                 
                                 <div className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 max-h-[400px] overflow-y-auto">
                                     <div className="prose prose-sm max-w-none text-gray-700 space-y-4">
-                                        <h3 className="text-base font-bold text-gray-900">CivicPath Complaint Submission Terms</h3>
+                                        <h3 className="text-base font-bold text-gray-900">{t('report.termsTitle')}</h3>
                                         
                                         <p className="text-sm leading-relaxed">
-                                            By submitting this complaint, you agree to the following terms and conditions:
+                                            {t('report.termsIntro')}
                                         </p>
 
                                         <div className="space-y-3">
                                             <div>
-                                                <h4 className="text-sm font-bold text-gray-900 mb-1">1. Accuracy of Information</h4>
+                                                <h4 className="text-sm font-bold text-gray-900 mb-1">{t('report.term1Title')}</h4>
                                                 <p className="text-sm">
-                                                    You confirm that all information provided in this complaint is true, accurate, and complete to the best of your knowledge. 
-                                                    Providing false or misleading information may result in rejection of your complaint and potential legal consequences.
+                                                    {t('report.term1Text')}
                                                 </p>
                                             </div>
 
                                             <div>
-                                                <h4 className="text-sm font-bold text-gray-900 mb-1">2. Privacy and Data Usage</h4>
+                                                <h4 className="text-sm font-bold text-gray-900 mb-1">{t('report.term2Title')}</h4>
                                                 <p className="text-sm">
-                                                    Your personal information (name, mobile number) will be used solely for the purpose of processing and resolving your complaint. 
-                                                    We will not share your contact details with third parties without your consent, except as required by law or for complaint resolution purposes.
+                                                    {t('report.term2Text')}
                                                 </p>
                                             </div>
 
                                             <div>
-                                                <h4 className="text-sm font-bold text-gray-900 mb-1">3. Photo and Media Rights</h4>
+                                                <h4 className="text-sm font-bold text-gray-900 mb-1">{t('report.term3Title')}</h4>
                                                 <p className="text-sm">
-                                                    By uploading photos or media files, you grant CivicPath and the municipal corporation the right to use these images for 
-                                                    complaint verification, resolution, and public awareness purposes. Ensure that uploaded images do not contain sensitive 
-                                                    personal information of others.
+                                                    {t('report.term3Text')}
                                                 </p>
                                             </div>
 
                                             <div>
-                                                <h4 className="text-sm font-bold text-gray-900 mb-1">4. Communication</h4>
+                                                <h4 className="text-sm font-bold text-gray-900 mb-1">{t('report.term4Title')}</h4>
                                                 <p className="text-sm">
-                                                    You agree to receive updates about your complaint via SMS, WhatsApp, or phone calls on the mobile number provided. 
-                                                    You may be contacted by municipal officers for additional information or site verification.
+                                                    {t('report.term4Text')}
                                                 </p>
                                             </div>
 
                                             <div>
-                                                <h4 className="text-sm font-bold text-gray-900 mb-1">5. Resolution Timeline</h4>
+                                                <h4 className="text-sm font-bold text-gray-900 mb-1">{t('report.term5Title')}</h4>
                                                 <p className="text-sm">
-                                                    While we strive to resolve all complaints within the specified SLA (Service Level Agreement) timelines, actual resolution 
-                                                    time may vary based on the nature and complexity of the issue. You will be notified of any delays.
+                                                    {t('report.term5Text')}
                                                 </p>
                                             </div>
 
                                             <div>
-                                                <h4 className="text-sm font-bold text-gray-900 mb-1">6. Complaint Validity</h4>
+                                                <h4 className="text-sm font-bold text-gray-900 mb-1">{t('report.term6Title')}</h4>
                                                 <p className="text-sm">
-                                                    The municipal corporation reserves the right to validate, reject, or mark complaints as duplicate if similar issues 
-                                                    have already been reported for the same location. You will be notified if your complaint is rejected or marked as duplicate.
+                                                    {t('report.term6Text')}
                                                 </p>
                                             </div>
 
                                             <div>
-                                                <h4 className="text-sm font-bold text-gray-900 mb-1">7. Public Disclosure</h4>
+                                                <h4 className="text-sm font-bold text-gray-900 mb-1">{t('report.term7Title')}</h4>
                                                 <p className="text-sm">
-                                                    Complaint details (excluding your personal contact information) may be displayed on the public dashboard for transparency 
-                                                    and accountability purposes. This includes complaint category, location, status, and resolution details.
+                                                    {t('report.term7Text')}
                                                 </p>
                                             </div>
 
                                             <div>
-                                                <h4 className="text-sm font-bold text-gray-900 mb-1">8. Misuse and Abuse</h4>
+                                                <h4 className="text-sm font-bold text-gray-900 mb-1">{t('report.term8Title')}</h4>
                                                 <p className="text-sm">
-                                                    Repeated submission of false complaints, spam, or abusive content may result in blocking of your mobile number from 
-                                                    the CivicPath system. Legal action may be taken in cases of severe misuse.
+                                                    {t('report.term8Text')}
                                                 </p>
                                             </div>
 
                                             <div>
-                                                <h4 className="text-sm font-bold text-gray-900 mb-1">9. Feedback and Satisfaction</h4>
+                                                <h4 className="text-sm font-bold text-gray-900 mb-1">{t('report.term9Title')}</h4>
                                                 <p className="text-sm">
-                                                    After complaint resolution, you may be asked to provide feedback on the service quality. Your feedback helps us 
-                                                    improve our services and hold departments accountable.
+                                                    {t('report.term9Text')}
                                                 </p>
                                             </div>
 
                                             <div>
-                                                <h4 className="text-sm font-bold text-gray-900 mb-1">10. Amendments</h4>
+                                                <h4 className="text-sm font-bold text-gray-900 mb-1">{t('report.term10Title')}</h4>
                                                 <p className="text-sm">
-                                                    These terms and conditions may be updated from time to time. Continued use of the CivicPath system constitutes 
-                                                    acceptance of any revised terms.
+                                                    {t('report.term10Text')}
                                                 </p>
                                             </div>
                                         </div>
 
                                         <div className="pt-4 border-t border-gray-200 mt-6">
                                             <p className="text-xs text-gray-500">
-                                                Last updated: February 24, 2026<br />
-                                                For questions or concerns, contact: support@civicpath.gov.in
+                                                {t('report.termsFooter')}<br />
+                                                {t('report.termsContact')}
                                             </p>
                                         </div>
                                     </div>
@@ -628,8 +616,7 @@ export default function ReportPage() {
                                             className="mt-1 w-5 h-5 rounded border-2 border-amber-400 text-civic-blue focus:ring-2 focus:ring-civic-blue cursor-pointer"
                                         />
                                         <span className="text-sm text-gray-900 leading-relaxed">
-                                            <strong>I have read and agree to the terms and conditions.</strong> I confirm that the information 
-                                            provided is accurate and I understand that my complaint will be processed according to the terms stated above.
+                                            {t('report.agreeCheckbox')}
                                         </span>
                                     </label>
                                 </div>
@@ -637,7 +624,7 @@ export default function ReportPage() {
                                 {!termsAccepted && (
                                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
                                         <p className="text-xs text-blue-800">
-                                            Please read and accept the terms and conditions to proceed with your complaint submission.
+                                            {t('report.pleaseAcceptTerms')}
                                         </p>
                                     </div>
                                 )}
