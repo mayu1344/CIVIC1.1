@@ -90,8 +90,8 @@ exports.createComplaint = async (req, res, next) => {
                     }
                     
                     await pool.query(
-                        `INSERT INTO complaint_attachments (complaint_id, file_url, file_name, file_size_kb, mime_type, file_type, uploaded_by_role, uploaded_by_name, uploaded_by_mobile)
-                         VALUES ($1, $2, $3, $4, $5, $6, 'citizen', $7, $8)`,
+                        `INSERT INTO complaint_attachments (complaint_id, file_url, file_name, file_size_kb, mime_type, file_type, uploaded_by_role)
+                         VALUES ($1, $2, $3, $4, $5, $6, 'citizen')`,
                         [
                             complaintData.id,
                             fileUrl,
@@ -100,9 +100,7 @@ exports.createComplaint = async (req, res, next) => {
                             file.mimetype,
                             file.mimetype.startsWith('image/') ? 'photo' : 
                             file.mimetype.startsWith('video/') ? 'video' : 
-                            file.mimetype.startsWith('audio/') ? 'audio' : 'document',
-                            citizenName,
-                            citizenMobile
+                            file.mimetype.startsWith('audio/') ? 'audio' : 'document'
                         ]
                     );
                 } catch (fileError) {
