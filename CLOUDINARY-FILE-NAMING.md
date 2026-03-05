@@ -8,20 +8,36 @@ The system now uses complaint ID and complaint number for naming uploaded files 
 
 ### 1. Initial Upload (Temporary Name)
 When a citizen uploads photos during complaint submission:
-- Files are uploaded with a temporary name: `temp_[timestamp]_[randomId]`
+- A UUID (Universally Unique Identifier) is generated for each file
+- Files are uploaded with a temporary name: `temp_[UUID]`
+- Example: `temp_7f3f3e89-30a2-49b0-88f3-fe12ba30bef4`
 - Tagged as `temp-upload` for easy identification
 - Stored in folder: `civicpath-complaints/`
 
 ### 2. After Complaint Creation (Rename)
 Once the complaint is successfully created in the database:
-- Files are automatically renamed to: `[COMPLAINT_NUMBER]_[COMPLAINT_ID]_[timestamp]`
-- Example: `CMP-2024-00123_456_1772225847009`
+- Files are automatically renamed to: `[UUID]_[COMPLAINT_NUMBER]`
+- Example: `7f3f3e89-30a2-49b0-88f3-fe12ba30bef4_CMP-2026-00015`
 - Temporary tag is removed
 - New tags added: `complaint:[COMPLAINT_NUMBER]`, `id:[COMPLAINT_ID]`
 
 ## File Naming Format
 
-### New Format
+### New Format (UUID-based)
+```
+[UUID]_[COMPLAINT_NUMBER]
+```
+
+**Example:**
+```
+7f3f3e89-30a2-49b0-88f3-fe12ba30bef4_CMP-2026-00015.jpg
+```
+
+Where:
+- `7f3f3e89-30a2-49b0-88f3-fe12ba30bef4` = UUID (unique identifier for the file)
+- `CMP-2026-00015` = Complaint Number (unique identifier for citizens)
+
+### Previous Format (Deprecated)
 ```
 [COMPLAINT_NUMBER]_[COMPLAINT_ID]_[TIMESTAMP]
 ```
@@ -30,11 +46,6 @@ Once the complaint is successfully created in the database:
 ```
 CMP-2024-00123_456_1772225847009.jpg
 ```
-
-Where:
-- `CMP-2024-00123` = Complaint Number (unique identifier for citizens)
-- `456` = Internal Complaint ID (database primary key)
-- `1772225847009` = Upload timestamp
 
 ### Old Format (Deprecated)
 ```
@@ -54,14 +65,18 @@ akshay_kumar_7406899490_1772225847009.jpg
 - ✅ Complies with data privacy best practices
 
 ### 2. Better Organization
+- ✅ UUID ensures globally unique file identification
 - ✅ Easy to search by complaint number
 - ✅ All files for a complaint grouped together
 - ✅ Clear relationship between files and complaints
+- ✅ No naming conflicts even with concurrent uploads
 
 ### 3. Professional Management
+- ✅ Industry-standard UUID format
 - ✅ Consistent naming convention
 - ✅ Easy to identify orphaned files
 - ✅ Better for auditing and tracking
+- ✅ Scalable for large volumes
 
 ## Cloudinary Tags
 
@@ -90,17 +105,19 @@ Each file includes structured metadata:
   "category": "roads",
   "upload_date": "2024-02-24T10:30:00.000Z",
   "uploaded_by": "citizen",
-  "status": "pending"
+  "status": "pending",
+  "uuid": "7f3f3e89-30a2-49b0-88f3-fe12ba30bef4"
 }
 ```
 
 ### Updated Metadata (After Complaint Creation)
 ```json
 {
-  "complaint_number": "CMP-2024-00123",
+  "complaint_number": "CMP-2026-00015",
   "complaint_id": "456",
   "category": "roads",
-  "status": "active"
+  "status": "active",
+  "uuid": "7f3f3e89-30a2-49b0-88f3-fe12ba30bef4"
 }
 ```
 
@@ -132,12 +149,19 @@ tag:temp-upload
 File: `backend/src/config/cloudinary.js`
 
 ```javascript
-// Initial upload with temporary name
-const publicId = `temp_${timestamp}_${randomId}`;
+const { v4: uuidv4 } = require('uuid');
+
+// Initial upload with UUID-based temporary name
+const uuid = uuidv4();
+const publicId = `temp_${uuid}`;
 
 // Rename function after complaint creation
 const renameCloudinaryFile = async (oldPublicId, complaintNumber, complaintId, category) => {
-    const newPublicId = `${complaintNumber}_${complaintId}_${Date.now()}`;
+    // Extract UUID from temp filename
+    const uuid = oldPublicId.replace('temp_', '');
+    
+    // New format: UUID_COMPLAINT-NUMBER
+    const newPublicId = `${uuid}_${complaintNumber}`;
     // ... rename logic
 };
 ```

@@ -1,6 +1,7 @@
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const logger = require('../utils/logger');
+const { v4: uuidv4 } = require('uuid');
 
 // Configure Cloudinary
 if (process.env.USE_CLOUDINARY === 'true') {
@@ -17,13 +18,12 @@ if (process.env.USE_CLOUDINARY === 'true') {
 const cloudinaryStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
-        // Use temporary ID during upload, will be renamed after complaint creation
-        const timestamp = Date.now();
-        const randomId = Math.round(Math.random() * 1E9);
+        // Generate UUID for unique identification
+        const uuid = uuidv4();
         const category = req.body.category || 'general';
         
-        // Create a temporary filename that will be updated after complaint creation
-        const publicId = `temp_${timestamp}_${randomId}`;
+        // Create a temporary filename with UUID that will be updated after complaint creation
+        const publicId = `temp_${uuid}`;
         
         return {
             folder: 'civicpath-complaints',
@@ -46,7 +46,8 @@ const cloudinaryStorage = new CloudinaryStorage({
                 category: category,
                 upload_date: new Date().toISOString(),
                 uploaded_by: 'citizen',
-                status: 'pending'
+                status: 'pending',
+                uuid: uuid
             }
         };
     }
@@ -55,7 +56,11 @@ const cloudinaryStorage = new CloudinaryStorage({
 // Function to rename uploaded file with complaint details
 const renameCloudinaryFile = async (oldPublicId, complaintNumber, complaintId, category) => {
     try {
-        const newPublicId = `${complaintNumber}_${complaintId}_${Date.now()}`;
+        // Extract UUID from temp filename (format: temp_uuid)
+        const uuid = oldPublicId.replace('temp_', '');
+        
+        // New format: UUID_COMPLAINT-NUMBER
+        const newPublicId = `${uuid}_${complaintNumber}`;
         
         // Rename the file in Cloudinary
         const result = await cloudinary.uploader.rename(
@@ -67,15 +72,19 @@ const renameCloudinaryFile = async (oldPublicId, complaintNumber, complaintId, c
             }
         );
         
-        // Update tags and context
-        await cloudinary.uploader.update_metadata(
+        // Update metadata
+        await cloudinary.uploader.explicit(
+            result.public_id,
             {
-                complaint_number: complaintNumber,
-                complaint_id: complaintId.toString(),
-                category: category,
-                status: 'active'
-            },
-            [result.public_id]
+                type: 'upload',
+                context: {
+                    complaint_number: complaintNumber,
+                    complaint_id: complaintId.toString(),
+                    category: category,
+                    status: 'active',
+                    uuid: uuid
+                }
+            }
         );
         
         // Update tags
