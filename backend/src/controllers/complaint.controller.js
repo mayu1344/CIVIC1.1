@@ -210,20 +210,29 @@ exports.getAllComplaints = async (req, res, next) => {
         params.push(limit, offset);
         const result = await pool.query(query, params);
 
-        // Fetch attachments for each complaint
+        // Fetch attachments for each complaint with error handling
         const complaintsWithAttachments = await Promise.all(
             result.rows.map(async (complaint) => {
-                const attachmentsQuery = `
-                    SELECT id, file_url, file_name, file_type, mime_type, file_size_kb, created_at
-                    FROM complaint_attachments
-                    WHERE complaint_id = $1
-                    ORDER BY created_at ASC
-                `;
-                const attachments = await pool.query(attachmentsQuery, [complaint.id]);
-                return {
-                    ...complaint,
-                    attachments: attachments.rows
-                };
+                try {
+                    const attachmentsQuery = `
+                        SELECT id, file_url, file_name, file_type, mime_type, file_size_kb, created_at
+                        FROM complaint_attachments
+                        WHERE complaint_id = $1
+                        ORDER BY created_at ASC
+                    `;
+                    const attachments = await pool.query(attachmentsQuery, [complaint.id]);
+                    return {
+                        ...complaint,
+                        attachments: attachments.rows
+                    };
+                } catch (attachmentError) {
+                    // If attachments table doesn't exist or query fails, return complaint without attachments
+                    logger.warn(`Could not fetch attachments for complaint ${complaint.id}:`, attachmentError.message);
+                    return {
+                        ...complaint,
+                        attachments: []
+                    };
+                }
             })
         );
 
