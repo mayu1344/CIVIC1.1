@@ -296,7 +296,7 @@ export default function ReportPage() {
                                         <select {...register("category")} className="input-field">
                                             <option value="">{t('report.selectCategory')}</option>
                                             {CATEGORIES.map(cat => (
-                                                <option key={cat.value} value={cat.value}>{cat.label}</option>
+                                                <option key={cat.value} value={cat.value}>{t(`categories.${cat.value}`)}</option>
                                             ))}
                                         </select>
                                         {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category.message}</p>}
@@ -326,7 +326,7 @@ export default function ReportPage() {
                                                     className="sr-only peer"
                                                 />
                                                 <div className="p-3 border-2 rounded-xl text-center font-bold text-sm capitalize peer-checked:border-civic-blue peer-checked:bg-blue-50 hover:border-gray-300 transition-all">
-                                                    {p}
+                                                    {t(`priorities.${p}`)}
                                                 </div>
                                             </label>
                                         ))}

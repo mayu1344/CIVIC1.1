@@ -143,5 +143,22 @@
     "resolved": "हल हो गया",
     "closed": "बंद",
     "rejected": "अस्वीकृत"
+  },
+  "categories": {
+    "roads": "सड़क और सार्वजनिक कार्य",
+    "water": "जल आपूर्ति",
+    "electricity": "बिजली",
+    "sanitation": "स्वच्छता और कचरा",
+    "street_lighting": "स्ट्रीट लाइटिंग",
+    "health": "स्वास्थ्य और सुरक्षा",
+    "parks": "पार्क और मनोरंजन",
+    "drainage": "जल निकासी और बाढ़",
+    "other": "अन्य"
+  },
+  "priorities": {
+    "low": "कम",
+    "medium": "मध्यम",
+    "high": "उच्च",
+    "critical": "गंभीर"
   }
 }

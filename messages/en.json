@@ -143,5 +143,22 @@
     "resolved": "Resolved",
     "closed": "Closed",
     "rejected": "Rejected"
+  },
+  "categories": {
+    "roads": "Roads & Public Works",
+    "water": "Water Supply",
+    "electricity": "Electricity",
+    "sanitation": "Sanitation & Waste",
+    "street_lighting": "Street Lighting",
+    "health": "Health & Safety",
+    "parks": "Parks & Recreation",
+    "drainage": "Drainage & Flooding",
+    "other": "Other"
+  },
+  "priorities": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
   }
 }
