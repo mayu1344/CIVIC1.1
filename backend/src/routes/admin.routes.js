@@ -7,5 +7,6 @@ router.get('/departments', adminController.getDepartments);
 router.post('/departments', adminController.createDepartment);
 router.get('/analytics', adminController.getAnalytics);
 router.get('/officers', adminController.getAllOfficers);
+router.post('/officers', adminController.createOfficer);
 
 module.exports = router;

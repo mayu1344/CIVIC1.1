@@ -112,3 +112,152 @@ exports.getAllOfficers = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.createOfficer = async (req, res, next) => {
+    try {
+        const {
+            full_name,
+            email,
+            mobile,
+            employee_id,
+            department_id,
+            designation
+        } = req.body;
+
+        // Start transaction
+        const client = await pool.connect();
+
+        try {
+            await client.query('BEGIN');
+
+            // Create user first
+            const userQuery = `
+                INSERT INTO users (full_name, email, mobile, role, status)
+                VALUES ($1, $2, $3, 'officer', 'active')
+                RETURNING id
+            `;
+
+            const userResult = await client.query(userQuery, [full_name, email, mobile]);
+            const userId = userResult.rows[0].id;
+
+            // Create officer record
+            const officerQuery = `
+                INSERT INTO officers (user_id, employee_id, department_id, designation, is_available)
+                VALUES ($1, $2, $3, $4, true)
+                RETURNING *
+            `;
+
+            const officerResult = await client.query(officerQuery, [
+                userId,
+                employee_id,
+                department_id,
+                designation || 'Field Officer'
+            ]);
+
+            await client.query('COMMIT');
+
+            // Fetch complete officer data
+            const fetchQuery = `
+                SELECT o.*, u.full_name, u.email, u.mobile, u.status, d.name as department_name
+                FROM officers o
+                JOIN users u ON o.user_id = u.id
+                LEFT JOIN departments d ON o.department_id = d.id
+                WHERE o.id = $1
+            `;
+
+            const result = await pool.query(fetchQuery, [officerResult.rows[0].id]);
+
+            res.status(201).json({
+                success: true,
+                message: 'Officer created successfully',
+                data: result.rows[0]
+            });
+
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
+
+    } catch (error) {
+        logger.error('Error creating officer:', error);
+        next(error);
+    }
+};
+
+
+exports.createOfficer = async (req, res, next) => {
+    try {
+        const { 
+            full_name, 
+            email, 
+            mobile, 
+            employee_id, 
+            department_id, 
+            designation 
+        } = req.body;
+        
+        // Start transaction
+        const client = await pool.connect();
+        
+        try {
+            await client.query('BEGIN');
+            
+            // Create user first
+            const userQuery = `
+                INSERT INTO users (full_name, email, mobile, role, status)
+                VALUES ($1, $2, $3, 'officer', 'active')
+                RETURNING id
+            `;
+            
+            const userResult = await client.query(userQuery, [full_name, email, mobile]);
+            const userId = userResult.rows[0].id;
+            
+            // Create officer record
+            const officerQuery = `
+                INSERT INTO officers (user_id, employee_id, department_id, designation, is_available)
+                VALUES ($1, $2, $3, $4, true)
+                RETURNING *
+            `;
+            
+            const officerResult = await client.query(officerQuery, [
+                userId, 
+                employee_id || `EMP-${Date.now()}`, 
+                department_id, 
+                designation || 'Field Officer'
+            ]);
+            
+            await client.query('COMMIT');
+            
+            // Fetch complete officer data
+            const fetchQuery = `
+                SELECT o.*, u.full_name, u.email, u.mobile, u.status, d.name as department_name
+                FROM officers o
+                JOIN users u ON o.user_id = u.id
+                LEFT JOIN departments d ON o.department_id = d.id
+                WHERE o.id = $1
+            `;
+            
+            const result = await pool.query(fetchQuery, [officerResult.rows[0].id]);
+            
+            logger.info(`Officer created: ${full_name} (${employee_id})`);
+            
+            res.status(201).json({
+                success: true,
+                message: 'Officer created successfully',
+                data: result.rows[0]
+            });
+            
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
+        
+    } catch (error) {
+        logger.error('Error creating officer:', error);
+        next(error);
+    }
+};
