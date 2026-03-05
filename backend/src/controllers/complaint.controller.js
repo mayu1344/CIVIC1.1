@@ -210,10 +210,27 @@ exports.getAllComplaints = async (req, res, next) => {
         params.push(limit, offset);
         const result = await pool.query(query, params);
 
+        // Fetch attachments for each complaint
+        const complaintsWithAttachments = await Promise.all(
+            result.rows.map(async (complaint) => {
+                const attachmentsQuery = `
+                    SELECT id, file_url, file_name, file_type, mime_type, file_size_kb, created_at
+                    FROM complaint_attachments
+                    WHERE complaint_id = $1
+                    ORDER BY created_at ASC
+                `;
+                const attachments = await pool.query(attachmentsQuery, [complaint.id]);
+                return {
+                    ...complaint,
+                    attachments: attachments.rows
+                };
+            })
+        );
+
         res.json({
             success: true,
             data: {
-                complaints: result.rows,
+                complaints: complaintsWithAttachments,
                 pagination: {
                     page: parseInt(page),
                     limit: parseInt(limit),
