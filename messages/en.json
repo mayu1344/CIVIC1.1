@@ -62,7 +62,12 @@
     "recentResolutions": {
       "title": "Recently Resolved",
       "subtitle": "Live Updates",
-      "viewAll": "View All"
+      "viewAll": "View All",
+      "issue1": "Pothole repaired on Nehru Street",
+      "issue2": "Water supply restored in Block C",
+      "issue3": "Street lights replaced on MG Road",
+      "issue4": "Garbage bins cleared at Market Road",
+      "ward": "Ward"
     }
   },
   "report": {
