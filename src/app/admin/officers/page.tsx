@@ -54,7 +54,8 @@ export default function OfficersPage() {
         try {
             setLoading(true);
             setError(null);
-            const response = await fetch('http://localhost:5000/api/v1/admin/officers');
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const response = await fetch(`${apiUrl}/api/v1/admin/officers`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -75,7 +76,8 @@ export default function OfficersPage() {
 
     const fetchDepartments = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/v1/admin/departments');
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const response = await fetch(`${apiUrl}/api/v1/admin/departments`);
             const data = await response.json();
             if (data.success && data.data) {
                 setDepartments(data.data);
@@ -95,7 +97,8 @@ export default function OfficersPage() {
         
         try {
             setSaving(true);
-            const response = await fetch('http://localhost:5000/api/v1/admin/officers', {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const response = await fetch(`${apiUrl}/api/v1/admin/officers`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
