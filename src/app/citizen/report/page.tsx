@@ -14,6 +14,7 @@ import dynamic from "next/dynamic";
 import { MapPin, Upload, X, Loader2, CheckCircle2, Camera, ArrowLeft } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const CivicMap = dynamic(() => import("@/components/ui/CivicMap"), { ssr: false });
 
@@ -35,6 +36,7 @@ type ReportFormData = z.infer<typeof reportSchema>;
 
 export default function ReportPage() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [step, setStep] = useState(1);
     const [submitting, setSubmitting] = useState(false);
     const [files, setFiles] = useState<File[]>([]);
@@ -234,15 +236,15 @@ export default function ReportPage() {
                     <Link href="/">
                         <Button variant="outline" className="flex items-center gap-2">
                             <ArrowLeft className="w-4 h-4" />
-                            Back to Home
+                            {t('report.backToHome')}
                         </Button>
                     </Link>
                 </div>
 
                 {/* Header */}
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-black text-gray-900 mb-2">Report a Civic Issue</h1>
-                    <p className="text-gray-600">Help us serve you better by reporting issues in your area</p>
+                    <h1 className="text-3xl font-black text-gray-900 mb-2">{t('report.title')}</h1>
+                    <p className="text-gray-600">{t('report.subtitle')}</p>
                 </div>
 
                 {/* Progress Steps */}
@@ -389,7 +391,7 @@ export default function ReportPage() {
                         {/* Step 3: Photos */}
                         {step === 3 && (
                             <div className="space-y-5 animate-fade-in">
-                                <h2 className="text-xl font-bold text-gray-900 mb-4">Upload Photos (Optional)</h2>
+                                <h2 className="text-xl font-bold text-gray-900 mb-4">{t('report.uploadPhotos')}</h2>
                                 
                                 {!showCamera ? (
                                     <>
