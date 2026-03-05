@@ -18,6 +18,17 @@
     "trackIssue": "Track Issue",
     "publicDashboard": "Public Dashboard"
   },
+  "footer": {
+    "description": "Empowering citizens to report and track civic issues for a better community.",
+    "quickLinks": "Quick Links",
+    "reportIssue": "Report Issue",
+    "trackComplaint": "Track Complaint",
+    "publicDashboard": "Public Dashboard",
+    "helpline": "Helpline",
+    "tollFree": "1800-XXX-XXXX (Toll Free)",
+    "poweredBy": "Powered by Cascade Technologies Solutions",
+    "copyright": "© 2024 CivicPath. All rights reserved."
+  },
   "home": {
     "hero": {
       "poweredBy": "Powered by Cascade Technologies Solutions",
@@ -53,6 +64,18 @@
       "subtitle": "Live Updates",
       "viewAll": "View All"
     }
+  },
+  "report": {
+    "title": "Report a Civic Issue",
+    "subtitle": "Help us serve you better by reporting issues in your area",
+    "backToHome": "Back to Home",
+    "issueDetails": "Issue Details",
+    "issueTitle": "Issue Title",
+    "issueTitlePlaceholder": "Brief description of the issue",
+    "detailedDescription": "Detailed Description",
+    "detailedDescriptionPlaceholder": "Provide detailed information about the issue...",
+    "category": "Category",
+    "subCategory": "Sub-Category"
   },
   "citizen": {
     "welcome": "Welcome to CivicPath",

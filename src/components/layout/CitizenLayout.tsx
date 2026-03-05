@@ -123,33 +123,33 @@ export function CitizenLayout({ children }: { children: React.ReactNode }) {
                         <div>
                             <div className="flex items-center gap-2 mb-3">
                                 <MapPin className="w-5 h-5 text-civic-orange" />
-                                <span className="font-bold text-lg">CivicPath</span>
+                                <span className="font-bold text-lg">{t('common.appName')}</span>
                             </div>
                             <p className="text-blue-200 text-sm">
-                                Empowering citizens to report and track civic issues for a better community.
+                                {t('footer.description')}
                             </p>
                         </div>
                         <div>
-                            <h4 className="font-semibold mb-3">Quick Links</h4>
+                            <h4 className="font-semibold mb-3">{t('footer.quickLinks')}</h4>
                             <ul className="space-y-2 text-blue-200 text-sm">
-                                <li><Link href="/citizen/report" className="hover:text-white transition-colors">Report Issue</Link></li>
-                                <li><Link href="/citizen/track" className="hover:text-white transition-colors">Track Complaint</Link></li>
-                                <li><Link href="/public" className="hover:text-white transition-colors">Public Dashboard</Link></li>
+                                <li><Link href="/citizen/report" className="hover:text-white transition-colors">{t('footer.reportIssue')}</Link></li>
+                                <li><Link href="/citizen/track" className="hover:text-white transition-colors">{t('footer.trackComplaint')}</Link></li>
+                                <li><Link href="/public" className="hover:text-white transition-colors">{t('footer.publicDashboard')}</Link></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="font-semibold mb-3">Helpline</h4>
+                            <h4 className="font-semibold mb-3">{t('footer.helpline')}</h4>
                             <div className="flex items-center gap-2 text-blue-200 text-sm">
                                 <Phone className="w-4 h-4" />
-                                <span>1800-XXX-XXXX (Toll Free)</span>
+                                <span>{t('footer.tollFree')}</span>
                             </div>
                             <p className="text-blue-300 text-xs mt-3">
-                                Powered by Cascade Technologies Solutions
+                                {t('footer.poweredBy')}
                             </p>
                         </div>
                     </div>
                     <div className="border-t border-white/10 mt-8 pt-5 text-center text-blue-300 text-xs">
-                        © 2024 CivicPath. All rights reserved.
+                        {t('footer.copyright')}
                     </div>
                 </div>
             </footer>
