@@ -307,7 +307,7 @@ export default function ReportPage() {
                                         <select {...register("subCategory")} className="input-field" disabled={!category}>
                                             <option value="">{t('report.selectSubCategory')}</option>
                                             {category && SUB_CATEGORIES[category]?.map(sub => (
-                                                <option key={sub} value={sub}>{sub}</option>
+                                                <option key={sub} value={sub}>{t(`subCategories.${sub}`)}</option>
                                             ))}
                                         </select>
                                         {errors.subCategory && <p className="text-red-500 text-xs mt-1">{errors.subCategory.message}</p>}
