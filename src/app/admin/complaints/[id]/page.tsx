@@ -22,7 +22,7 @@ const CivicMap = dynamic(() => import("@/components/ui/CivicMap"), { ssr: false 
 
 export default function ComplaintDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
-    const [complaint, setComplaint] = useState(MOCK_COMPLAINTS.find(c => c.id === params.id));
+    const [complaint, setComplaint] = useState<any>(MOCK_COMPLAINTS.find(c => c.id === params.id));
     const [loading, setLoading] = useState(false);
     const [showAssignModal, setShowAssignModal] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
@@ -36,7 +36,9 @@ export default function ComplaintDetailPage({ params }: { params: { id: string }
     useEffect(() => {
         // Try to fetch from API, fallback to mock
         complaintService.getComplaintById(params.id)
-            .then((data: any) => setComplaint(data))
+            .then((data: any) => {
+                setComplaint(data);
+            })
             .catch(() => {
                 const mock = MOCK_COMPLAINTS.find(c => c.id === params.id);
                 if (mock) setComplaint(mock);
@@ -211,14 +213,44 @@ export default function ComplaintDetailPage({ params }: { params: { id: string }
                         </div>
 
                         {/* Media Gallery */}
-                        {complaint.mediaCount > 0 && (
+                        {complaint.attachments && complaint.attachments.length > 0 && (
                             <div className="civic-card p-6">
-                                <h3 className="section-title mb-4">Attached Photos ({complaint.mediaCount})</h3>
-                                <div className="grid grid-cols-3 gap-4">
-                                    {Array.from({ length: complaint.mediaCount }).map((_, i) => (
-                                        <div key={i} className="aspect-square bg-gray-100 rounded-xl flex items-center justify-center">
-                                            <Camera className="w-8 h-8 text-gray-300" />
-                                        </div>
+                                <h3 className="section-title mb-4">Attached Photos ({complaint.attachments.length})</h3>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    {complaint.attachments.map((attachment: any, i: number) => (
+                                        <a
+                                            key={attachment.id || i}
+                                            href={attachment.file_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="group relative aspect-square bg-gray-100 rounded-xl overflow-hidden hover:ring-2 hover:ring-civic-blue transition-all"
+                                        >
+                                            <img
+                                                src={attachment.file_url}
+                                                alt={attachment.file_name || `Photo ${i + 1}`}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                onError={(e) => {
+                                                    // Fallback if image fails to load
+                                                    (e.target as HTMLImageElement).style.display = 'none';
+                                                    const parent = (e.target as HTMLElement).parentElement;
+                                                    if (parent) {
+                                                        const fallback = document.createElement('div');
+                                                        fallback.className = 'w-full h-full flex items-center justify-center';
+                                                        fallback.innerHTML = '<svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
+                                                        parent.appendChild(fallback);
+                                                    }
+                                                }}
+                                            />
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className="bg-white rounded-full p-2">
+                                                        <svg className="w-5 h-5 text-civic-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
                                     ))}
                                 </div>
                             </div>
