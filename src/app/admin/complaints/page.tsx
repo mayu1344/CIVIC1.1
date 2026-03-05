@@ -18,6 +18,7 @@ const PRIORITIES_FILTER = ["all", ...PRIORITIES] as const;
 export default function ComplaintsPage() {
     const [complaints, setComplaints] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [priorityFilter, setPriorityFilter] = useState("all");
@@ -33,24 +34,30 @@ export default function ComplaintsPage() {
     const fetchComplaints = async () => {
         try {
             setLoading(true);
+            setError(null);
             const response = await fetch('http://localhost:5000/api/complaints');
             
             if (!response.ok) {
-                throw new Error('Failed to fetch complaints');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             const data = await response.json();
+            console.log('API Response:', data); // Debug log
             
             if (data.success && data.data) {
                 // Handle both array and paginated response
                 const complaintsData = Array.isArray(data.data) ? data.data : data.data.complaints || [];
+                console.log('Complaints loaded:', complaintsData.length); // Debug log
                 setComplaints(complaintsData);
             } else {
+                console.warn('No complaints data in response');
                 setComplaints([]);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching complaints:', error);
-            toast.error('Failed to load complaints');
+            const errorMsg = error.message || 'Unknown error';
+            setError(errorMsg);
+            toast.error(`Failed to load complaints: ${errorMsg}. Please check if backend is running on port 5000.`);
             setComplaints([]);
         } finally {
             setLoading(false);
@@ -85,6 +92,41 @@ export default function ComplaintsPage() {
                     <div className="text-center">
                         <Loader2 className="w-8 h-8 animate-spin text-civic-blue mx-auto mb-3" />
                         <p className="text-gray-500">Loading complaints...</p>
+                    </div>
+                </div>
+            </AdminLayout>
+        );
+    }
+
+    if (error) {
+        return (
+            <AdminLayout>
+                <div className="flex items-center justify-center h-96">
+                    <div className="text-center max-w-md">
+                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <AlertTriangle className="w-8 h-8 text-red-500" />
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">Failed to Load Complaints</h3>
+                        <p className="text-gray-600 mb-4">
+                            Could not connect to the backend server. Please make sure:
+                        </p>
+                        <ul className="text-left text-sm text-gray-600 mb-6 space-y-2">
+                            <li>• Backend server is running on <code className="bg-gray-100 px-2 py-1 rounded">http://localhost:5000</code></li>
+                            <li>• Database is connected and running</li>
+                            <li>• No firewall blocking the connection</li>
+                        </ul>
+                        <div className="flex gap-3 justify-center">
+                            <Button onClick={fetchComplaints} leftIcon={<Loader2 className="w-4 h-4" />}>
+                                Retry
+                            </Button>
+                            <Button 
+                                variant="ghost" 
+                                onClick={() => window.open('http://localhost:5000/api/complaints', '_blank')}
+                            >
+                                Test API
+                            </Button>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-4">Error: {error}</p>
                     </div>
                 </div>
             </AdminLayout>
