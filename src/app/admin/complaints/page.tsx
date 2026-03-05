@@ -2,20 +2,22 @@
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import { StatusBadge, PriorityBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { MOCK_COMPLAINTS } from "@/lib/mockData";
 import { formatDate, getSLAStatus, cn, truncate } from "@/lib/utils";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { COMPLAINT_STATUSES, CATEGORIES, PRIORITIES } from "@/lib/constants";
 import {
     Search, Filter, Download, Eye, ChevronDown,
-    AlertTriangle, CheckSquare, Copy, ChevronLeft, ChevronRight
+    AlertTriangle, CheckSquare, Copy, ChevronLeft, ChevronRight, Loader2
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 const STATUSES_FILTER = ["all", ...COMPLAINT_STATUSES] as const;
 const PRIORITIES_FILTER = ["all", ...PRIORITIES] as const;
 
 export default function ComplaintsPage() {
+    const [complaints, setComplaints] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [priorityFilter, setPriorityFilter] = useState("all");
@@ -23,8 +25,43 @@ export default function ComplaintsPage() {
     const [page, setPage] = useState(1);
     const PER_PAGE = 10;
 
-    const filtered = MOCK_COMPLAINTS.filter((c) => {
-        const matchSearch = search === "" || c.complaintNumber.includes(search.toUpperCase()) || c.citizenName.toLowerCase().includes(search.toLowerCase()) || c.title.toLowerCase().includes(search.toLowerCase());
+    // Fetch complaints from API
+    useEffect(() => {
+        fetchComplaints();
+    }, []);
+
+    const fetchComplaints = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch('http://localhost:5000/api/complaints');
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch complaints');
+            }
+            
+            const data = await response.json();
+            
+            if (data.success && data.data) {
+                // Handle both array and paginated response
+                const complaintsData = Array.isArray(data.data) ? data.data : data.data.complaints || [];
+                setComplaints(complaintsData);
+            } else {
+                setComplaints([]);
+            }
+        } catch (error) {
+            console.error('Error fetching complaints:', error);
+            toast.error('Failed to load complaints');
+            setComplaints([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const filtered = complaints.filter((c) => {
+        const matchSearch = search === "" || 
+            c.complaint_number?.toUpperCase().includes(search.toUpperCase()) || 
+            c.citizen_name?.toLowerCase().includes(search.toLowerCase()) || 
+            c.title?.toLowerCase().includes(search.toLowerCase());
         const matchStatus = statusFilter === "all" || c.status === statusFilter;
         const matchPriority = priorityFilter === "all" || c.priority === priorityFilter;
         return matchSearch && matchStatus && matchPriority;
@@ -38,8 +75,21 @@ export default function ComplaintsPage() {
     };
 
     const toggleAll = () => {
-        setSelected(selected.length === paginated.length ? [] : paginated.map((c) => c.id));
+        setSelected(selected.length === paginated.length ? [] : paginated.map((c) => c.id.toString()));
     };
+
+    if (loading) {
+        return (
+            <AdminLayout>
+                <div className="flex items-center justify-center h-96">
+                    <div className="text-center">
+                        <Loader2 className="w-8 h-8 animate-spin text-civic-blue mx-auto mb-3" />
+                        <p className="text-gray-500">Loading complaints...</p>
+                    </div>
+                </div>
+            </AdminLayout>
+        );
+    }
 
     return (
         <AdminLayout>
@@ -141,21 +191,21 @@ export default function ComplaintsPage() {
                                     </tr>
                                 ) : (
                                     paginated.map((c) => {
-                                        const sla = getSLAStatus(c.slaDeadline);
+                                        const sla = getSLAStatus(c.sla_deadline);
                                         return (
-                                            <tr key={c.id} className={cn(selected.includes(c.id) && "bg-blue-50/30")}>
+                                            <tr key={c.id} className={cn(selected.includes(c.id.toString()) && "bg-blue-50/30")}>
                                                 <td>
                                                     <input
                                                         type="checkbox"
-                                                        checked={selected.includes(c.id)}
-                                                        onChange={() => toggleSelect(c.id)}
+                                                        checked={selected.includes(c.id.toString())}
+                                                        onChange={() => toggleSelect(c.id.toString())}
                                                         className="rounded border-gray-300"
                                                     />
                                                 </td>
                                                 <td>
                                                     <div>
-                                                        <span className="font-mono text-xs font-semibold text-civic-blue">{c.complaintNumber}</span>
-                                                        {c.isEscalated && (
+                                                        <span className="font-mono text-xs font-semibold text-civic-blue">{c.complaint_number}</span>
+                                                        {c.is_escalated && (
                                                             <div className="flex items-center gap-1 mt-0.5">
                                                                 <AlertTriangle className="w-3 h-3 text-red-500" />
                                                                 <span className="text-red-500 text-xs font-semibold">Escalated</span>
@@ -164,19 +214,19 @@ export default function ComplaintsPage() {
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <p className="font-semibold text-gray-800 text-sm">{c.citizenName}</p>
+                                                    <p className="font-semibold text-gray-800 text-sm">{c.citizen_name || 'N/A'}</p>
                                                 </td>
                                                 <td>
-                                                    <p className="font-mono text-xs text-gray-600">{c.citizenMobile}</p>
+                                                    <p className="font-mono text-xs text-gray-600">{c.citizen_mobile || 'N/A'}</p>
                                                 </td>
                                                 <td>
                                                     <p className="text-gray-700 text-xs truncate max-w-[200px]">{truncate(c.title, 50)}</p>
                                                     <p className="text-gray-400 text-xs">{c.ward}</p>
                                                 </td>
                                                 <td>
-                                                    <span className="text-xs text-gray-600 capitalize">{c.category.replace(/_/g, " ")}</span>
+                                                    <span className="text-xs text-gray-600 capitalize">{c.category?.replace(/_/g, " ")}</span>
                                                     <br />
-                                                    <span className="text-xs text-gray-400">{c.subCategory}</span>
+                                                    <span className="text-xs text-gray-400">{c.sub_category}</span>
                                                 </td>
                                                 <td><PriorityBadge priority={c.priority} /></td>
                                                 <td><StatusBadge status={c.status} /></td>
@@ -184,8 +234,8 @@ export default function ComplaintsPage() {
                                                     <span className={cn("text-xs font-semibold", sla.color)}>{sla.label}</span>
                                                 </td>
                                                 <td>
-                                                    <p className="text-xs font-medium text-gray-700">{c.assignedOfficer || "—"}</p>
-                                                    <p className="text-xs text-gray-400">{c.assignedDept || "Unassigned"}</p>
+                                                    <p className="text-xs font-medium text-gray-700">{c.officer_name || "—"}</p>
+                                                    <p className="text-xs text-gray-400">{c.department_name || "Unassigned"}</p>
                                                 </td>
                                                 <td>
                                                     <Link
