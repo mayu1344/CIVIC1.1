@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { COMPLAINT_STATUSES, CATEGORIES, PRIORITIES } from "@/lib/constants";
 import {
     Search, Filter, Download, Eye, ChevronDown,
-    AlertTriangle, CheckSquare, Copy, ChevronLeft, ChevronRight, Loader2, Image as ImageIcon
+    AlertTriangle, CheckSquare, Copy, ChevronLeft, ChevronRight, Loader2, Image as ImageIcon, MapPin
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -202,7 +202,7 @@ export default function ComplaintsPage() {
                 {/* Table */}
                 <div className="civic-card overflow-hidden">
                     <div className="overflow-x-auto custom-scrollbar">
-                        <table className="data-table min-w-[1100px]">
+                        <table className="data-table min-w-[1200px]">
                             <thead>
                                 <tr>
                                     <th>
@@ -219,6 +219,7 @@ export default function ComplaintsPage() {
                                     <th>Issue</th>
                                     <th>Category</th>
                                     <th>Photo</th>
+                                    <th>Map Location</th>
                                     <th>Priority</th>
                                     <th>Status</th>
                                     <th>SLA</th>
@@ -229,7 +230,7 @@ export default function ComplaintsPage() {
                             <tbody>
                                 {paginated.length === 0 ? (
                                     <tr>
-                                        <td colSpan={12} className="text-center py-12 text-gray-400">
+                                        <td colSpan={13} className="text-center py-12 text-gray-400">
                                             <Search className="w-8 h-8 mx-auto mb-2 opacity-30" />
                                             <p className="text-sm">No complaints match your filters</p>
                                         </td>
@@ -313,6 +314,22 @@ export default function ComplaintsPage() {
                                                         <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center">
                                                             <ImageIcon className="w-5 h-5 text-gray-300" />
                                                         </div>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    {c.latitude && c.longitude ? (
+                                                        <a
+                                                            href={`https://www.google.com/maps?q=${c.latitude},${c.longitude}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 text-xs font-semibold rounded-lg transition-colors group"
+                                                            title={`View location: ${c.latitude}, ${c.longitude}`}
+                                                        >
+                                                            <MapPin className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                                                            View Map
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-xs text-gray-400 italic">No location</span>
                                                     )}
                                                 </td>
                                                 <td><PriorityBadge priority={c.priority} /></td>
