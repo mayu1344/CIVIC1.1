@@ -41,8 +41,7 @@ export default function OfficersPage() {
         full_name: "",
         email: "",
         mobile: "",
-        department_id: "",
-        designation: "Field Officer"
+        department_id: ""
     });
 
     useEffect(() => {
@@ -115,8 +114,7 @@ export default function OfficersPage() {
                     full_name: "",
                     email: "",
                     mobile: "",
-                    department_id: "",
-                    designation: "Field Officer"
+                    department_id: ""
                 });
                 fetchOfficers(); // Refresh the list
             } else {
@@ -234,19 +232,13 @@ export default function OfficersPage() {
                                     </select>
                                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                 </div>
-                            </div>
-                            <div>
-                                <label className="label-field">Designation</label>
-                                <input 
-                                    placeholder="Field Officer" 
-                                    className="input-field"
-                                    value={formData.designation}
-                                    onChange={(e) => setFormData({...formData, designation: e.target.value})}
-                                />
+                                {departments.length === 0 && (
+                                    <p className="text-xs text-orange-600 mt-1">⚠️ No departments found. Please add departments first.</p>
+                                )}
                             </div>
                         </div>
                         <div className="flex gap-3 mt-4">
-                            <Button type="submit" disabled={saving}>
+                            <Button type="submit" disabled={saving || departments.length === 0}>
                                 {saving ? (
                                     <>
                                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />

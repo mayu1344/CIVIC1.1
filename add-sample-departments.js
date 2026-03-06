@@ -1,13 +1,10 @@
 // Script to add sample departments to the database
 const { Pool } = require('pg');
-require('dotenv').config({ path: './.env' });
 
+// Use the Render database URL directly
 const pool = new Pool({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    database: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
+    connectionString: 'postgresql://civicpath_db_user:pret9eicHI9KtRKzBEGpt1sLSV74buRH@dpg-d6ft9mrh46gs738k11c0-a.singapore-postgres.render.com/civicpath_db',
+    ssl: { rejectUnauthorized: false }
 });
 
 const departments = [
