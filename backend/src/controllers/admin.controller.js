@@ -1,5 +1,6 @@
 const { pool } = require('../config/database');
 const logger = require('../utils/logger');
+const bcrypt = require('bcrypt');
 
 exports.getDashboardStats = async (req, res, next) => {
     try {
@@ -210,7 +211,6 @@ exports.createOfficer = async (req, res, next) => {
                 : `officer_${mobile.slice(-4)}`;
             
             // Generate a default password (mobile number) - officer should change it on first login
-            const bcrypt = require('bcrypt');
             const defaultPassword = mobile; // Use mobile as default password
             const password_hash = await bcrypt.hash(defaultPassword, 10);
             
