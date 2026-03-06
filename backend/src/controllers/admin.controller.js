@@ -204,14 +204,19 @@ exports.createOfficer = async (req, res, next) => {
         try {
             await client.query('BEGIN');
             
+            // Generate username from email or mobile
+            const username = email 
+                ? email.split('@')[0].toLowerCase() 
+                : `officer_${mobile.slice(-4)}`;
+            
             // Create user first
             const userQuery = `
-                INSERT INTO users (full_name, email, mobile, role, status)
-                VALUES ($1, $2, $3, 'officer', 'active')
+                INSERT INTO users (username, full_name, email, mobile, role, status)
+                VALUES ($1, $2, $3, $4, 'officer', 'active')
                 RETURNING id
             `;
             
-            const userResult = await client.query(userQuery, [full_name, email, mobile]);
+            const userResult = await client.query(userQuery, [username, full_name, email, mobile]);
             const userId = userResult.rows[0].id;
             
             // Create officer record
