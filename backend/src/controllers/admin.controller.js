@@ -209,14 +209,19 @@ exports.createOfficer = async (req, res, next) => {
                 ? email.split('@')[0].toLowerCase() 
                 : `officer_${mobile.slice(-4)}`;
             
+            // Generate a default password (mobile number) - officer should change it on first login
+            const bcrypt = require('bcrypt');
+            const defaultPassword = mobile; // Use mobile as default password
+            const password_hash = await bcrypt.hash(defaultPassword, 10);
+            
             // Create user first
             const userQuery = `
-                INSERT INTO users (username, full_name, email, mobile, role, status)
-                VALUES ($1, $2, $3, $4, 'officer', 'active')
+                INSERT INTO users (username, full_name, email, mobile, password_hash, role, status)
+                VALUES ($1, $2, $3, $4, $5, 'officer', 'active')
                 RETURNING id
             `;
             
-            const userResult = await client.query(userQuery, [username, full_name, email, mobile]);
+            const userResult = await client.query(userQuery, [username, full_name, email, mobile, password_hash]);
             const userId = userResult.rows[0].id;
             
             // Create officer record
