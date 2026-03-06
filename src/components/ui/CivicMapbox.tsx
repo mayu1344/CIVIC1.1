@@ -1,11 +1,39 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import Map, { Marker, NavigationControl, GeolocateControl } from 'react-map-gl/mapbox';
-import { MapPin } from 'lucide-react';
+import Map, { Marker, NavigationControl, GeolocateControl, Layer, Source } from 'react-map-gl/mapbox';
+import { MapPin, Map as MapIcon, Satellite, Layers, Mountain } from 'lucide-react';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
+// Map style options
+const MAP_STYLES = {
+    streets: {
+        id: 'streets',
+        name: 'Streets',
+        url: 'mapbox://styles/mapbox/streets-v12',
+        icon: MapIcon
+    },
+    satellite: {
+        id: 'satellite',
+        name: 'Satellite',
+        url: 'mapbox://styles/mapbox/satellite-streets-v12',
+        icon: Satellite
+    },
+    terrain: {
+        id: 'terrain',
+        name: 'Terrain',
+        url: 'mapbox://styles/mapbox/outdoors-v12',
+        icon: Mountain
+    },
+    dark: {
+        id: 'dark',
+        name: 'Dark',
+        url: 'mapbox://styles/mapbox/dark-v11',
+        icon: Layers
+    }
+};
 
 interface CivicMapboxProps {
     center?: [number, number];
@@ -14,6 +42,8 @@ interface CivicMapboxProps {
     markers?: Array<{ lat: number; lon: number; label?: string; color?: string }>;
     interactive?: boolean;
     style?: string;
+    showStyleSwitcher?: boolean;
+    show3DToggle?: boolean;
 }
 
 export default function CivicMapbox({
@@ -22,31 +52,58 @@ export default function CivicMapbox({
     onLocationSelect,
     markers = [],
     interactive = true,
-    style = 'mapbox://styles/mapbox/streets-v12'
+    style = 'mapbox://styles/mapbox/streets-v12',
+    showStyleSwitcher = true,
+    show3DToggle = true
 }: CivicMapboxProps) {
     const [viewState, setViewState] = useState({
         longitude: center[0],
         latitude: center[1],
-        zoom: zoom
+        zoom: zoom,
+        pitch: 0,
+        bearing: 0
     });
     
     const [selectedLocation, setSelectedLocation] = useState<{ lng: number; lat: number } | null>(
         interactive ? { lng: center[0], lat: center[1] } : null
     );
     
+    const [currentStyle, setCurrentStyle] = useState(style);
+    const [is3DMode, setIs3DMode] = useState(false);
+    const [showStyleMenu, setShowStyleMenu] = useState(false);
+    
     const mapRef = useRef<any>(null);
 
     // Update view when center prop changes
     useEffect(() => {
-        setViewState({
+        setViewState(prev => ({
+            ...prev,
             longitude: center[0],
             latitude: center[1],
             zoom: zoom
-        });
+        }));
         if (interactive) {
             setSelectedLocation({ lng: center[0], lat: center[1] });
         }
     }, [center, zoom, interactive]);
+
+    // Enable 3D terrain when map loads
+    useEffect(() => {
+        if (mapRef.current && is3DMode) {
+            const map = mapRef.current.getMap();
+            map.once('style.load', () => {
+                if (!map.getSource('mapbox-dem')) {
+                    map.addSource('mapbox-dem', {
+                        type: 'raster-dem',
+                        url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                        tileSize: 512,
+                        maxzoom: 14
+                    });
+                    map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
+                }
+            });
+        }
+    }, [is3DMode, currentStyle]);
 
     const handleMapClick = useCallback((event: any) => {
         if (!interactive) return;
@@ -59,6 +116,43 @@ export default function CivicMapbox({
         }
     }, [interactive, onLocationSelect]);
 
+    const toggle3DMode = useCallback(() => {
+        setIs3DMode(prev => {
+            const newMode = !prev;
+            setViewState(prev => ({
+                ...prev,
+                pitch: newMode ? 60 : 0,
+                bearing: newMode ? -17.6 : 0
+            }));
+            
+            if (mapRef.current) {
+                const map = mapRef.current.getMap();
+                if (newMode) {
+                    // Enable 3D terrain
+                    if (!map.getSource('mapbox-dem')) {
+                        map.addSource('mapbox-dem', {
+                            type: 'raster-dem',
+                            url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                            tileSize: 512,
+                            maxzoom: 14
+                        });
+                    }
+                    map.setTerrain({ source: 'mapbox-dem', exaggeration: 1.5 });
+                } else {
+                    // Disable 3D terrain
+                    map.setTerrain(null);
+                }
+            }
+            
+            return newMode;
+        });
+    }, []);
+
+    const changeMapStyle = useCallback((styleUrl: string) => {
+        setCurrentStyle(styleUrl);
+        setShowStyleMenu(false);
+    }, []);
+
     return (
         <div className="w-full h-full rounded-2xl overflow-hidden border border-gray-200 shadow-inner relative">
             <Map
@@ -67,20 +161,73 @@ export default function CivicMapbox({
                 onClick={handleMapClick}
                 mapboxAccessToken={MAPBOX_TOKEN}
                 style={{ width: '100%', height: '100%' }}
-                mapStyle={style}
+                mapStyle={currentStyle}
                 scrollZoom={interactive}
                 dragPan={interactive}
-                dragRotate={false}
-                pitchWithRotate={false}
+                dragRotate={is3DMode}
+                pitchWithRotate={is3DMode}
                 touchZoomRotate={interactive}
                 ref={mapRef}
+                terrain={is3DMode ? { source: 'mapbox-dem', exaggeration: 1.5 } : undefined}
             >
+                {/* Style Switcher */}
+                {showStyleSwitcher && (
+                    <div className="absolute top-4 left-4 z-10">
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowStyleMenu(!showStyleMenu)}
+                                className="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg shadow-lg border border-gray-200 flex items-center gap-2 transition-all"
+                            >
+                                <Layers className="w-4 h-4" />
+                                <span className="text-sm font-medium">Map Style</span>
+                            </button>
+                            
+                            {showStyleMenu && (
+                                <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden min-w-[160px]">
+                                    {Object.values(MAP_STYLES).map((mapStyle) => {
+                                        const Icon = mapStyle.icon;
+                                        return (
+                                            <button
+                                                key={mapStyle.id}
+                                                onClick={() => changeMapStyle(mapStyle.url)}
+                                                className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors ${
+                                                    currentStyle === mapStyle.url ? 'bg-civic-blue/10 text-civic-blue' : 'text-gray-700'
+                                                }`}
+                                            >
+                                                <Icon className="w-4 h-4" />
+                                                <span className="text-sm font-medium">{mapStyle.name}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* 3D Toggle */}
+                {show3DToggle && (
+                    <div className="absolute top-4 right-4 z-10">
+                        <button
+                            onClick={toggle3DMode}
+                            className={`px-4 py-2 rounded-lg shadow-lg border transition-all flex items-center gap-2 ${
+                                is3DMode 
+                                    ? 'bg-civic-blue text-white border-civic-blue' 
+                                    : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+                            }`}
+                        >
+                            <Mountain className="w-4 h-4" />
+                            <span className="text-sm font-medium">{is3DMode ? '3D View' : '2D View'}</span>
+                        </button>
+                    </div>
+                )}
+
                 {/* Navigation Controls */}
                 {interactive && (
                     <>
-                        <NavigationControl position="top-right" showCompass={false} />
+                        <NavigationControl position="bottom-right" showCompass={is3DMode} />
                         <GeolocateControl
-                            position="top-right"
+                            position="bottom-right"
                             trackUserLocation
                             onGeolocate={(e) => {
                                 if (onLocationSelect) {
