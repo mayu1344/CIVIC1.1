@@ -205,10 +205,12 @@ exports.createOfficer = async (req, res, next) => {
         try {
             await client.query('BEGIN');
             
-            // Generate username from email or mobile
-            const username = email 
+            // Generate unique username from email or mobile with random suffix
+            const baseUsername = email 
                 ? email.split('@')[0].toLowerCase() 
                 : `officer_${mobile.slice(-4)}`;
+            const randomSuffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            const username = `${baseUsername}_${randomSuffix}`;
             
             // Generate a default password (mobile number) - officer should change it on first login
             const defaultPassword = mobile; // Use mobile as default password
