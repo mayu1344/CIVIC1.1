@@ -17,7 +17,7 @@ import {
     MessageSquare, Camera, Send
 } from "lucide-react";
 
-const CivicMap = dynamic(() => import("@/components/ui/CivicMap"), { ssr: false });
+const CivicMapbox = dynamic(() => import("@/components/ui/CivicMapbox"), { ssr: false });
 
 export default function MLAIssueDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -179,8 +179,8 @@ export default function MLAIssueDetailPage({ params }: { params: { id: string } 
                                 </div>
                             </div>
                             <div className="h-[300px] rounded-2xl overflow-hidden">
-                                <CivicMap
-                                    center={[issue.latitude, issue.longitude]}
+                                <CivicMapbox
+                                    center={[issue.longitude, issue.latitude]}
                                     zoom={16}
                                     markers={[{ lat: issue.latitude, lon: issue.longitude }]}
                                     interactive={false}

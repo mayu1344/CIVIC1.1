@@ -18,7 +18,7 @@ import {
     CheckCircle2, Camera, Upload, X, MessageSquare, Navigation
 } from "lucide-react";
 
-const CivicMap = dynamic(() => import("@/components/ui/CivicMap"), { ssr: false });
+const CivicMapbox = dynamic(() => import("@/components/ui/CivicMapbox"), { ssr: false });
 
 export default function TaskDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -173,8 +173,8 @@ export default function TaskDetailPage({ params }: { params: { id: string } }) {
                                 </div>
                             </div>
                             <div className="h-[300px] rounded-2xl overflow-hidden">
-                                <CivicMap
-                                    center={[task.latitude, task.longitude]}
+                                <CivicMapbox
+                                    center={[task.longitude, task.latitude]}
                                     zoom={16}
                                     markers={[{ lat: task.latitude, lon: task.longitude }]}
                                     interactive={false}

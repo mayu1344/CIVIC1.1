@@ -16,7 +16,7 @@ import { useDropzone } from "react-dropzone";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const CivicMap = dynamic(() => import("@/components/ui/CivicMap"), { ssr: false });
+const CivicMapbox = dynamic(() => import("@/components/ui/CivicMapbox"), { ssr: false });
 
 const reportSchema = z.object({
     title: z.string().min(10, "Title must be at least 10 characters"),
@@ -353,8 +353,8 @@ export default function ReportPage() {
                                 </div>
 
                                 <div className="h-[400px] rounded-2xl overflow-hidden">
-                                    <CivicMap
-                                        center={[latitude, longitude]}
+                                    <CivicMapbox
+                                        center={[longitude, latitude]}
                                         zoom={15}
                                         onLocationSelect={handleLocationSelect}
                                         interactive={true}

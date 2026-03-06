@@ -18,7 +18,7 @@ import {
     CheckCircle2, XCircle, UserPlus, MessageSquare, Upload, Clock, Camera
 } from "lucide-react";
 
-const CivicMap = dynamic(() => import("@/components/ui/CivicMap"), { ssr: false });
+const CivicMapbox = dynamic(() => import("@/components/ui/CivicMapbox"), { ssr: false });
 
 export default function ComplaintDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -203,8 +203,8 @@ export default function ComplaintDetailPage({ params }: { params: { id: string }
                                 </div>
                             </div>
                             <div className="h-[300px] rounded-2xl overflow-hidden">
-                                <CivicMap
-                                    center={[complaint.latitude, complaint.longitude]}
+                                <CivicMapbox
+                                    center={[complaint.longitude, complaint.latitude]}
                                     zoom={16}
                                     markers={[{ lat: complaint.latitude, lon: complaint.longitude }]}
                                     interactive={false}
@@ -213,13 +213,13 @@ export default function ComplaintDetailPage({ params }: { params: { id: string }
                         </div>
 
                         {/* Media Gallery */}
-                        {complaint.attachments && complaint.attachments.length > 0 && (
+                        {complaint.attachments && complaint.attachments.length > 0 ? (
                             <div className="civic-card p-6">
                                 <h3 className="section-title mb-4">Attached Photos ({complaint.attachments.length})</h3>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                     {complaint.attachments.map((attachment: any, i: number) => (
                                         <a
-                                            key={attachment.id || i}
+                                            key={i}
                                             href={attachment.file_url}
                                             target="_blank"
                                             rel="noopener noreferrer"
@@ -227,7 +227,7 @@ export default function ComplaintDetailPage({ params }: { params: { id: string }
                                         >
                                             <img
                                                 src={attachment.file_url}
-                                                alt={attachment.file_name || `Photo ${i + 1}`}
+                                                alt={`Photo ${i + 1}`}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                             />
                                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
@@ -243,7 +243,18 @@ export default function ComplaintDetailPage({ params }: { params: { id: string }
                                     ))}
                                 </div>
                             </div>
-                        )}
+                        ) : complaint.mediaCount && complaint.mediaCount > 0 ? (
+                            <div className="civic-card p-6">
+                                <h3 className="section-title mb-4">Attached Photos ({complaint.mediaCount})</h3>
+                                <div className="grid grid-cols-3 gap-4">
+                                    {Array.from({ length: complaint.mediaCount }).map((_, i) => (
+                                        <div key={i} className="aspect-square bg-gray-100 rounded-xl flex items-center justify-center">
+                                            <Camera className="w-8 h-8 text-gray-300" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null}
                     </div>
 
                     {/* Sidebar */}
