@@ -240,9 +240,16 @@ exports.createOfficer = async (req, res, next) => {
             
             await client.query('COMMIT');
             
-            // Fetch complete officer data
+            // Fetch complete officer data with correct department field names
             const fetchQuery = `
-                SELECT o.*, u.full_name, u.email, u.mobile, u.status, d.name as department_name
+                SELECT 
+                    o.*, 
+                    u.full_name, 
+                    u.email, 
+                    u.mobile, 
+                    u.status, 
+                    d.name as department_name,
+                    d.id as department_id
                 FROM officers o
                 JOIN users u ON o.user_id = u.id
                 LEFT JOIN departments d ON o.department_id = d.id
@@ -251,7 +258,7 @@ exports.createOfficer = async (req, res, next) => {
             
             const result = await pool.query(fetchQuery, [officerResult.rows[0].id]);
             
-            logger.info(`Officer created: ${full_name} (${employee_id})`);
+            logger.info(`Officer created: ${full_name} (${employee_id || 'auto-generated'})`);
             
             res.status(201).json({
                 success: true,
