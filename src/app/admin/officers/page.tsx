@@ -23,8 +23,8 @@ interface Officer {
 }
 
 interface Department {
-    id: string;
-    name: string;
+    department_id: string;
+    department_name: string;
 }
 
 export default function OfficersPage() {
@@ -227,7 +227,7 @@ export default function OfficersPage() {
                                     >
                                         <option value="">Select Department</option>
                                         {departments.map((d) => (
-                                            <option key={d.id} value={d.id}>{d.name}</option>
+                                            <option key={d.department_id} value={d.department_id}>{d.department_name}</option>
                                         ))}
                                     </select>
                                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
