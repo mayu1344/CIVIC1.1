@@ -208,31 +208,37 @@ exports.getAllComplaints = async (req, res, next) => {
         params.push(limit, offset);
         const result = await pool.query(query, params);
 
-        // Fetch attachments for each complaint with error handling
-        const complaintsWithAttachments = await Promise.all(
-            result.rows.map(async (complaint) => {
-                try {
-                    const attachmentsQuery = `
-                        SELECT id, file_url, file_name, file_type, mime_type, file_size_kb, uploaded_at
-                        FROM complaint_attachments
-                        WHERE complaint_id = $1
-                        ORDER BY uploaded_at ASC
-                    `;
-                    const attachments = await pool.query(attachmentsQuery, [complaint.id]);
-                    return {
-                        ...complaint,
-                        attachments: attachments.rows
-                    };
-                } catch (attachmentError) {
-                    // If attachments table doesn't exist or query fails, return complaint without attachments
-                    logger.warn(`Could not fetch attachments for complaint ${complaint.id}:`, attachmentError.message);
-                    return {
-                        ...complaint,
-                        attachments: []
-                    };
-                }
-            })
-        );
+        // Fetch all attachments for these complaints in a single query (optimized)
+        const complaintIds = result.rows.map(c => c.id);
+        let attachmentsMap = {};
+        
+        if (complaintIds.length > 0) {
+            try {
+                const attachmentsQuery = `
+                    SELECT complaint_id, id, file_url, file_name, file_type, mime_type, file_size_kb, uploaded_at
+                    FROM complaint_attachments
+                    WHERE complaint_id = ANY($1)
+                    ORDER BY uploaded_at ASC
+                `;
+                const attachmentsResult = await pool.query(attachmentsQuery, [complaintIds]);
+                
+                // Group attachments by complaint_id
+                attachmentsResult.rows.forEach(attachment => {
+                    if (!attachmentsMap[attachment.complaint_id]) {
+                        attachmentsMap[attachment.complaint_id] = [];
+                    }
+                    attachmentsMap[attachment.complaint_id].push(attachment);
+                });
+            } catch (attachmentError) {
+                logger.warn('Could not fetch attachments:', attachmentError.message);
+            }
+        }
+
+        // Add attachments to each complaint
+        const complaintsWithAttachments = result.rows.map(complaint => ({
+            ...complaint,
+            attachments: attachmentsMap[complaint.id] || []
+        }));
 
         res.json({
             success: true,
