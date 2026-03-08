@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { MOCK_STATS, MOCK_TREND_DATA, MOCK_CATEGORY_DATA, MOCK_DEPARTMENTS, MOCK_OFFICERS } from "@/lib/mockData";
 import { formatNumber, cn } from "@/lib/utils";
 import {
@@ -10,14 +11,7 @@ import {
     LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
-
-const DEPT_RANK = [
-    { name: "Sanitation", score: 94, resolved: 121, sla: 90 },
-    { name: "Water", score: 91, resolved: 88, sla: 93 },
-    { name: "Roads", score: 85, resolved: 138, sla: 88 },
-    { name: "Lighting", score: 83, resolved: 59, sla: 85 },
-    { name: "Electricity", score: 71, resolved: 61, sla: 72 },
-];
+import ComplaintHeatmap from "@/components/ui/ComplaintHeatmap";
 
 const SLA_TREND = [
     { month: "Sep", rate: 78 },
@@ -29,7 +23,74 @@ const SLA_TREND = [
 ];
 
 export default function MLADashboardPage() {
+    const [departmentPerformance, setDepartmentPerformance] = useState([]);
+    const [stats, setStats] = useState({
+        totalIssues: 0,
+        resolved: 0,
+        pending: 0,
+        totalTrend: '+0%',
+        resolvedTrend: '+0%'
+    });
+    const [loading, setLoading] = useState(true);
     const topOfficers = [...MOCK_OFFICERS].sort((a, b) => b.performanceScore - a.performanceScore).slice(0, 3);
+
+    useEffect(() => {
+        // Initial fetch
+        fetchDepartmentPerformance();
+        fetchStats();
+
+        // Auto-refresh every 10 seconds
+        const statsInterval = setInterval(() => {
+            fetchStats();
+        }, 10000);
+
+        const deptInterval = setInterval(() => {
+            fetchDepartmentPerformance();
+        }, 30000);
+
+        // Cleanup intervals on unmount
+        return () => {
+            clearInterval(statsInterval);
+            clearInterval(deptInterval);
+        };
+    }, []);
+
+    const fetchStats = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/v1/complaints/stats/dashboard');
+            const data = await response.json();
+            if (data.success) {
+                const statsData = data.data;
+                const total = parseInt(statsData.total_complaints) || 0;
+                const resolved = parseInt(statsData.resolved) || 0;
+                const pending = parseInt(statsData.submitted) + parseInt(statsData.in_progress) || 0;
+                
+                setStats({
+                    totalIssues: total,
+                    resolved: resolved,
+                    pending: pending,
+                    totalTrend: '+12%', // Can be calculated from historical data
+                    resolvedTrend: '+8%'
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+        }
+    };
+
+    const fetchDepartmentPerformance = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/v1/mla/department-performance');
+            const data = await response.json();
+            if (data.success) {
+                setDepartmentPerformance(data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching department performance:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleLogout = () => {
         window.location.href = "/";
@@ -73,12 +134,11 @@ export default function MLADashboardPage() {
                 </div>
 
                 {/* KPI Cards */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {[
-                        { label: "Total Issues", value: formatNumber(MOCK_STATS.totalIssues), sub: "All time", icon: <BarChart2 className="w-5 h-5 text-blue-600" />, bg: "bg-blue-50", trend: "+12%" },
-                        { label: "Resolved", value: formatNumber(MOCK_STATS.resolvedThisMonth), sub: "This month", icon: <CheckCircle2 className="w-5 h-5 text-green-600" />, bg: "bg-green-50", trend: "+8%" },
-                        { label: "Pending", value: formatNumber(MOCK_STATS.pending), sub: "Awaiting action", icon: <Clock className="w-5 h-5 text-orange-600" />, bg: "bg-orange-50", trend: " " },
-                        { label: "Satisfaction", value: `${MOCK_STATS.citizenSatisfaction}%`, sub: "Citizen feedback", icon: <Star className="w-5 h-5 text-yellow-500" />, bg: "bg-yellow-50", trend: "+3%" },
+                        { label: "Total Issues", value: formatNumber(stats.totalIssues), sub: "All time", icon: <BarChart2 className="w-5 h-5 text-blue-600" />, bg: "bg-blue-50", trend: stats.totalTrend },
+                        { label: "Resolved", value: formatNumber(stats.resolved), sub: "This month", icon: <CheckCircle2 className="w-5 h-5 text-green-600" />, bg: "bg-green-50", trend: stats.resolvedTrend },
+                        { label: "Pending", value: formatNumber(stats.pending), sub: "Awaiting action", icon: <Clock className="w-5 h-5 text-orange-600" />, bg: "bg-orange-50", trend: " " },
                     ].map((s) => (
                         <div key={s.label} className="civic-card p-5">
                             <div className="flex justify-between items-start mb-3">
@@ -92,39 +152,6 @@ export default function MLADashboardPage() {
                             <p className="text-xs text-gray-400">{s.sub}</p>
                         </div>
                     ))}
-                </div>
-
-                {/* Media-ready Summary Card */}
-                <div className="bg-gradient-civic rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden">
-                    <div className="absolute right-0 top-0 w-48 h-48 rounded-full bg-white/5 -translate-y-1/3 translate-x-1/4" />
-                    <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-white/5 translate-y-1/3 -translate-x-1/4" />
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Star className="w-4 h-4 text-yellow-300" />
-                            <span className="text-sm font-semibold text-blue-100">MLA Achievement Summary — February 2024</span>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                            {[
-                                { value: "312", label: "Issues Resolved" },
-                                { value: "3.2 days", label: "Avg Fix Time" },
-                                { value: "94%", label: "SLA Compliance" },
-                                { value: "78%", label: "Satisfaction" },
-                            ].map((s) => (
-                                <div key={s.label} className="text-center">
-                                    <p className="text-3xl font-black text-white">{s.value}</p>
-                                    <p className="text-blue-200 text-xs mt-1">{s.label}</p>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="mt-5 flex gap-3">
-                            <button className="btn-orange px-5 py-2 rounded-xl text-sm">
-                                <Share2 className="w-4 h-4" /> Share on Social Media
-                            </button>
-                            <button className="bg-white/10 hover:bg-white/20 border border-white/20 px-5 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
-                                <Download className="w-4 h-4" /> Download Image
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Charts Row */}
@@ -169,36 +196,54 @@ export default function MLADashboardPage() {
                     {/* Dept Ranking */}
                     <div className="civic-card p-5">
                         <h3 className="section-title mb-5">Department Performance Ranking</h3>
-                        <div className="space-y-3">
-                            {DEPT_RANK.map((d, i) => (
-                                <div key={d.name} className="flex items-center gap-3">
-                                    <span className={cn(
-                                        "w-7 h-7 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0",
-                                        i === 0 ? "bg-yellow-100 text-yellow-700" :
-                                            i === 1 ? "bg-gray-100 text-gray-600" :
-                                                i === 2 ? "bg-orange-100 text-orange-700" : "bg-gray-50 text-gray-400"
-                                    )}>
-                                        {i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1}
-                                    </span>
-                                    <div className="flex-1">
-                                        <div className="flex items-center justify-between mb-1">
-                                            <span className="text-sm font-semibold text-gray-800">{d.name}</span>
-                                            <div className="flex items-center gap-3 text-xs text-gray-500">
-                                                <span>{d.resolved} resolved</span>
-                                                <span className={cn("font-bold", d.sla >= 85 ? "text-civic-green" : d.sla >= 75 ? "text-civic-orange" : "text-red-500")}>{d.sla}% SLA</span>
+                        {loading ? (
+                            <div className="text-center py-8 text-gray-400">Loading...</div>
+                        ) : departmentPerformance.length === 0 ? (
+                            <div className="text-center py-8">
+                                <p className="text-gray-400 mb-2">No department data available</p>
+                                <p className="text-xs text-gray-400">Assign complaints to departments to see performance rankings</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {departmentPerformance.map((d, i) => (
+                                    <div key={d.id} className="flex items-center gap-3">
+                                        <span className={cn(
+                                            "w-7 h-7 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0",
+                                            i === 0 ? "bg-yellow-100 text-yellow-700" :
+                                                i === 1 ? "bg-gray-100 text-gray-600" :
+                                                    i === 2 ? "bg-orange-100 text-orange-700" : "bg-gray-50 text-gray-400"
+                                        )}>
+                                            {i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1}
+                                        </span>
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-sm font-semibold text-gray-800">{d.department_name}</span>
+                                                <div className="flex items-center gap-3 text-xs text-gray-500">
+                                                    <span>{d.resolved_count} resolved</span>
+                                                    <span className={cn("font-bold", 
+                                                        d.sla_compliance >= 85 ? "text-civic-green" : 
+                                                        d.sla_compliance >= 75 ? "text-civic-orange" : "text-red-500"
+                                                    )}>
+                                                        {d.sla_compliance || 0}% SLA
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="w-full h-1.5 bg-gray-100 rounded-full">
+                                                <div
+                                                    className={cn("h-full rounded-full", 
+                                                        i === 0 ? "bg-civic-green" : 
+                                                        i === 1 ? "bg-blue-500" : 
+                                                        i === 2 ? "bg-civic-orange" : "bg-gray-400"
+                                                    )}
+                                                    style={{ width: `${d.performance_score}%` }}
+                                                />
                                             </div>
                                         </div>
-                                        <div className="w-full h-1.5 bg-gray-100 rounded-full">
-                                            <div
-                                                className={cn("h-full rounded-full", i === 0 ? "bg-civic-green" : i === 1 ? "bg-blue-500" : i === 2 ? "bg-civic-orange" : "bg-gray-400")}
-                                                style={{ width: `${d.score}%` }}
-                                            />
-                                        </div>
+                                        <span className="text-xs font-black text-gray-600 w-8 text-right">{d.performance_score}</span>
                                     </div>
-                                    <span className="text-xs font-black text-gray-600 w-8 text-right">{d.score}</span>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Top Officers */}
@@ -231,42 +276,16 @@ export default function MLADashboardPage() {
                     </div>
                 </div>
 
-                {/* Heat Map Placeholder */}
+                {/* Heat Map */}
                 <div className="civic-card p-5">
-                    <div className="section-header">
+                    <div className="section-header mb-4">
                         <h3 className="section-title">Geographic Issue Heat Map</h3>
                         <span className="badge badge-blue text-xs">Live Data</span>
                     </div>
-                    <div className="w-full h-64 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl flex items-center justify-center border border-gray-100 relative overflow-hidden">
-                        {/* Simulated heat map dots */}
-                        {[
-                            { x: 30, y: 40, size: 60, opacity: 0.5 },
-                            { x: 55, y: 25, size: 80, opacity: 0.4 },
-                            { x: 70, y: 55, size: 50, opacity: 0.6 },
-                            { x: 20, y: 65, size: 40, opacity: 0.45 },
-                            { x: 45, y: 70, size: 70, opacity: 0.35 },
-                            { x: 80, y: 30, size: 45, opacity: 0.5 },
-                        ].map((dot, i) => (
-                            <div
-                                key={i}
-                                className="absolute rounded-full animate-pulse-soft"
-                                style={{
-                                    left: `${dot.x}%`,
-                                    top: `${dot.y}%`,
-                                    width: `${dot.size}px`,
-                                    height: `${dot.size}px`,
-                                    background: `radial-gradient(circle, rgba(249,115,22,${dot.opacity}), transparent)`,
-                                    transform: "translate(-50%, -50%)",
-                                    animationDelay: `${i * 0.3}s`,
-                                }}
-                            />
-                        ))}
-                        <div className="relative z-10 text-center">
-                            <MapPin className="w-8 h-8 text-civic-blue mx-auto mb-2 opacity-50" />
-                            <p className="text-sm text-gray-500 font-medium">Constituency Heat Map</p>
-                            <p className="text-xs text-gray-400">Orange clusters = high complaint density areas</p>
-                        </div>
-                    </div>
+                    <ComplaintHeatmap height="320px" />
+                    <p className="text-xs text-gray-400 mt-3 text-center">
+                        Red/orange areas indicate high complaint density. Map updates every 30 seconds.
+                    </p>
                 </div>
             </div>
         </div>

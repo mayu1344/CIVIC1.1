@@ -150,3 +150,101 @@ exports.getDirectives = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.getDepartmentPerformance = async (req, res, next) => {
+    try {
+        const query = `
+            SELECT 
+                d.id,
+                d.name as department_name,
+                COUNT(c.id) as total_complaints,
+                COUNT(CASE WHEN c.status = 'resolved' THEN 1 END) as resolved_count,
+                COUNT(CASE WHEN c.status IN ('submitted', 'validated', 'assigned', 'in_progress') THEN 1 END) as pending_count,
+                ROUND(
+                    (COUNT(CASE WHEN c.status = 'resolved' THEN 1 END)::numeric / 
+                    NULLIF(COUNT(c.id), 0)) * 100, 
+                    0
+                ) as resolution_rate,
+                ROUND(
+                    (COUNT(CASE WHEN c.status = 'resolved' AND c.resolved_at IS NOT NULL THEN 1 END)::numeric / 
+                    NULLIF(COUNT(CASE WHEN c.status = 'resolved' THEN 1 END), 0)) * 100, 
+                    0
+                ) as sla_compliance
+            FROM departments d
+            LEFT JOIN complaints c ON d.id = c.assigned_department_id AND c.deleted_at IS NULL
+            WHERE d.is_active = true
+            GROUP BY d.id, d.name
+            HAVING COUNT(c.id) > 0
+            ORDER BY resolution_rate DESC, sla_compliance DESC
+        `;
+        
+        const result = await pool.query(query);
+        
+        // Calculate performance score (weighted average of resolution rate and SLA compliance)
+        const departmentsWithScore = result.rows.map(dept => ({
+            ...dept,
+            performance_score: Math.round((
+                (parseFloat(dept.resolution_rate) || 0) * 0.6 + 
+                (parseFloat(dept.sla_compliance) || 0) * 0.4
+            ))
+        }));
+        
+        res.json({
+            success: true,
+            data: departmentsWithScore
+        });
+    } catch (error) {
+        logger.error('Error fetching department performance:', error);
+        next(error);
+    }
+};
+
+
+exports.getComplaintLocations = async (req, res, next) => {
+    try {
+        const query = `
+            SELECT 
+                id,
+                latitude,
+                longitude,
+                priority,
+                status,
+                title
+            FROM complaints
+            WHERE latitude IS NOT NULL 
+            AND longitude IS NOT NULL 
+            AND deleted_at IS NULL
+            ORDER BY created_at DESC
+        `;
+        
+        const result = await pool.query(query);
+        
+        // Format for GeoJSON
+        const features = result.rows.map(complaint => ({
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: [parseFloat(complaint.longitude), parseFloat(complaint.latitude)]
+            },
+            properties: {
+                id: complaint.id,
+                title: complaint.title,
+                priority: complaint.priority,
+                status: complaint.status
+            }
+        }));
+        
+        const geojson = {
+            type: 'FeatureCollection',
+            features: features
+        };
+        
+        res.json({
+            success: true,
+            data: geojson
+        });
+    } catch (error) {
+        logger.error('Error fetching complaint locations:', error);
+        next(error);
+    }
+};
