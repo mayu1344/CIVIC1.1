@@ -101,8 +101,11 @@ export default function ComplaintHeatmap({ height = '400px' }: ComplaintHeatmapP
 
     if (!MAPBOX_TOKEN) {
         return (
-            <div className="w-full bg-gray-100 rounded-2xl flex items-center justify-center" style={{ height }}>
-                <p className="text-gray-500 text-sm">Mapbox token not configured</p>
+            <div className="w-full bg-gray-100 rounded-2xl flex items-center justify-center p-4" style={{ height }}>
+                <div className="text-center">
+                    <p className="text-gray-500 text-sm mb-2">Mapbox token not configured</p>
+                    <p className="text-xs text-gray-400">Add NEXT_PUBLIC_MAPBOX_TOKEN to environment variables</p>
+                </div>
             </div>
         );
     }
