@@ -61,24 +61,6 @@ export function CitizenLayout({ children }: { children: React.ReactNode }) {
                                 <LanguageSwitcher />
                             </div>
 
-                            {/* MLA Portrait */}
-                            <div className="flex items-center gap-2.5 pl-3 border-l border-white/10">
-                                <div className="text-right">
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-blue-200 leading-none mb-0.5">Your MLA</p>
-                                    <p className="text-xs font-bold text-white whitespace-nowrap">Shri. Mahesh Tenginkai</p>
-                                </div>
-                                <div className="w-10 h-10 rounded-full border-2 border-civic-orange shadow-lg overflow-hidden bg-white shrink-0">
-                                    <img
-                                        src="/static/mla.jpg"
-                                        alt="MLA Portrait"
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            e.currentTarget.src = "https://ui-avatars.com/api/?name=Mahesh+Tenginkai&background=f97316&color=fff";
-                                        }}
-                                    />
-                                </div>
-                            </div>
-
                             <button
                                 onClick={() => setMobileOpen(!mobileOpen)}
                                 className="md:hidden text-white p-2 rounded-lg hover:bg-white/10"
