@@ -32,10 +32,6 @@ const DATE_RANGES = ["Last 7 Days", "Last 30 Days", "Last 3 Months", "Last Year"
 export default function AnalyticsPage() {
     const [dateRange, setDateRange] = useState("Last 30 Days");
 
-    const leaderboard = [...MOCK_OFFICERS]
-        .sort((a, b) => b.performanceScore - a.performanceScore)
-        .map((o, i) => ({ ...o, rank: i + 1 }));
-
     return (
         <AdminLayout>
             <div className="space-y-6 animate-fade-in">
@@ -134,68 +130,7 @@ export default function AnalyticsPage() {
                     </div>
                 </div>
 
-                {/* Row 3: Officer Leaderboard */}
-                <div className="civic-card p-5">
-                    <h3 className="section-title mb-5">Officer Performance Leaderboard</h3>
-                    <div className="overflow-x-auto custom-scrollbar">
-                        <table className="data-table min-w-[600px]">
-                            <thead>
-                                <tr>
-                                    <th>Rank</th>
-                                    <th>Officer</th>
-                                    <th>Department</th>
-                                    <th>Active Cases</th>
-                                    <th>Resolved</th>
-                                    <th>Performance</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {leaderboard.map((o) => (
-                                    <tr key={o.id}>
-                                        <td>
-                                            <span className={cn(
-                                                "w-7 h-7 rounded-full flex items-center justify-center text-xs font-black",
-                                                o.rank === 1 ? "bg-yellow-100 text-yellow-700" :
-                                                    o.rank === 2 ? "bg-gray-100 text-gray-600" :
-                                                        o.rank === 3 ? "bg-orange-100 text-orange-700" : "text-gray-400"
-                                            )}>
-                                                {o.rank <= 3 ? ["🥇", "🥈", "🥉"][o.rank - 1] : o.rank}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-8 h-8 bg-gradient-civic rounded-full flex items-center justify-center flex-shrink-0">
-                                                    <span className="text-white text-xs font-bold">{o.name.charAt(0)}</span>
-                                                </div>
-                                                <span className="font-semibold text-gray-800">{o.name}</span>
-                                            </div>
-                                        </td>
-                                        <td><span className="text-xs text-gray-500">{o.department}</span></td>
-                                        <td><span className="font-semibold text-civic-orange">{o.activeCases}</span></td>
-                                        <td><span className="font-semibold text-civic-green">{o.resolvedTotal}</span></td>
-                                        <td>
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-20 h-1.5 bg-gray-100 rounded-full">
-                                                    <div
-                                                        className={cn("h-full rounded-full", o.performanceScore >= 85 ? "bg-civic-green" : o.performanceScore >= 70 ? "bg-civic-orange" : "bg-red-500")}
-                                                        style={{ width: `${o.performanceScore}%` }}
-                                                    />
-                                                </div>
-                                                <span className="text-xs font-semibold">{o.performanceScore}%</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span className={cn("badge", o.isActive ? "badge-green" : "badge-gray")}>
-                                                {o.isActive ? "Active" : "Inactive"}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+
             </div>
         </AdminLayout>
     );
