@@ -11,7 +11,6 @@ import {
     LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
-import ComplaintHeatmap from "@/components/ui/ComplaintHeatmap";
 
 const SLA_TREND = [
     { month: "Sep", rate: 78 },
@@ -274,18 +273,6 @@ export default function MLADashboardPage() {
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {/* Heat Map */}
-                <div className="civic-card p-5">
-                    <div className="section-header mb-4">
-                        <h3 className="section-title">Geographic Issue Heat Map</h3>
-                        <span className="badge badge-blue text-xs">Live Data</span>
-                    </div>
-                    <ComplaintHeatmap height="320px" />
-                    <p className="text-xs text-gray-400 mt-3 text-center">
-                        Red/orange areas indicate high complaint density. Map updates every 30 seconds.
-                    </p>
                 </div>
             </div>
         </div>

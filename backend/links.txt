@@ -1,0 +1,26 @@
+1️⃣ ADMIN DASHBOARD
+http://localhost:3001/admin/dashboard
+Login Page:
+
+http://localhost:3001/admin/login
+2️⃣ OFFICER DASHBOARD
+http://localhost:3001/officer/dashboard
+Login Page:
+
+http://localhost:3001/officer/login
+3️⃣ MLA DASHBOARD
+http://localhost:3001/mla/dashboard
+Login Page:
+
+http://localhost:3001/mla/login
+📋 ADDITIONAL USEFUL LINKS
+Citizen Portal
+http://localhost:3001/citizen
+http://localhost:3001/citizen/report
+http://localhost:3001/citizen/track
+Public Dashboard
+http://localhost:3001/public
+Backend API
+
+http://localhost:5000
+http://localhost:5000/api/v1/health
