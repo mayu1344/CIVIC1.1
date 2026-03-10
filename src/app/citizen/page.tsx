@@ -1,3 +1,12 @@
+
+
+
+
+
+
+
+
+
 "use client";
 import { CitizenLayout } from "@/components/layout/CitizenLayout";
 import Link from "next/link";
@@ -44,8 +53,8 @@ const HOW_IT_WORKS = [
     {
         step: "04",
         icon: <CheckCircle className="w-6 h-6" />,
-        title: "Resolution & Updates",
-        description: "Get real-time SMS/WhatsApp updates as your issue progresses. View photo proof of resolution.",
+        title: "Track & Resolve",
+        description: "Monitor progress in real-time and get notified when your issue is resolved.",
         color: "bg-green-50 text-civic-green",
     },
 ];
@@ -214,24 +223,15 @@ export default function CitizenHome() {
                                 {t('home.cta.reportButton')}
                             </Link>
                             <Link href="/citizen/track" className="btn-secondary bg-white/10 border-white/30 text-white hover:bg-white/20 px-6 py-3 rounded-xl text-base">
-                                {t('home.cta.trackButton')}
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ── RECENT RESOLUTIONS ── */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
                 <div className="section-header">
                     <div>
-                        <span className="text-civic-green text-sm font-bold uppercase tracking-wider">Live Updates</span>
-                        <h2 className="text-2xl font-black text-gray-900 mt-1">Recently Resolved</h2>
+                        <span className="text-civic-green text-sm font-bold uppercase tracking-wider">{t('home.recentResolutions.subtitle')}</span>
+                        <h2 className="text-2xl font-black text-gray-900 mt-1">{t('home.recentResolutions.title')}</h2>
                     </div>
                     <Link href="/public" className="btn-ghost text-civic-blue flex items-center gap-1">
-                        View All <ChevronRight className="w-4 h-4" />
+                        {t('home.recentResolutions.viewAll')} <ChevronRight className="w-4 h-4" />
                     </Link>
-                </div>
+                </div>lassName="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {RECENT_RESOLUTIONS.map((item) => (
                         <div key={item.id} className="civic-card p-4 flex items-start gap-3 hover:shadow-card-md transition-shadow">
@@ -239,7 +239,16 @@ export default function CitizenHome() {
                                 <CheckCircle className="w-5 h-5 text-civic-green" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-900 truncate">{item.issue}</p>
+                                <p className="text-sm font-semibold text-gray-900 truncate">{t(`home.recentResolutions.${item.issueKey}`)}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <span className="badge badge-green text-xs">{item.category}</span>
+                                    <span className="text-xs text-gray-400">{t('home.recentResolutions.ward')} {item.ward}</span>
+                                    <span className="text-xs text-gray-400 ml-auto">{item.daysAgo}d ago</span>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>          <p className="text-sm font-semibold text-gray-900 truncate">{item.issue}</p>
                                 <div className="flex items-center gap-2 mt-1">
                                     <span className="badge badge-green text-xs">{item.category}</span>
                                     <span className="text-xs text-gray-400">{item.ward}</span>

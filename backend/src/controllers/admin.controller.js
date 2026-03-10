@@ -29,6 +29,42 @@ exports.getDashboardStats = async (req, res, next) => {
     }
 };
 
+exports.getDepartmentStats = async (req, res, next) => {
+    try {
+        const query = `
+            SELECT 
+                d.id,
+                d.name,
+                d.code,
+                d.sla_hours,
+                d.is_active,
+                COUNT(c.id) as total_cases,
+                COUNT(CASE WHEN c.status = 'resolved' THEN 1 END) as resolved_cases,
+                COUNT(CASE WHEN c.status IN ('submitted', 'validated', 'assigned', 'in_progress') THEN 1 END) as pending_cases,
+                CASE 
+                    WHEN COUNT(c.id) > 0 THEN 
+                        ROUND((COUNT(CASE WHEN c.status = 'resolved' THEN 1 END)::numeric / COUNT(c.id)::numeric) * 100, 0)
+                    ELSE 0 
+                END as resolution_rate
+            FROM departments d
+            LEFT JOIN complaints c ON d.id = c.department_id AND c.deleted_at IS NULL
+            WHERE d.deleted_at IS NULL
+            GROUP BY d.id, d.name, d.code, d.sla_hours, d.is_active
+            ORDER BY d.name
+        `;
+        
+        const result = await pool.query(query);
+        
+        res.json({
+            success: true,
+            data: result.rows
+        });
+    } catch (error) {
+        logger.error('Error fetching department stats:', error);
+        next(error);
+    }
+};
+
 exports.getDepartments = async (req, res, next) => {
     try {
         const query = `SELECT * FROM v_department_statistics ORDER BY department_name`;
