@@ -223,6 +223,15 @@ export default function CitizenHome() {
                                 {t('home.cta.reportButton')}
                             </Link>
                             <Link href="/citizen/track" className="btn-secondary bg-white/10 border-white/30 text-white hover:bg-white/20 px-6 py-3 rounded-xl text-base">
+                                {t('home.cta.trackButton')}
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ── RECENT RESOLUTIONS ── */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
                 <div className="section-header">
                     <div>
                         <span className="text-civic-green text-sm font-bold uppercase tracking-wider">{t('home.recentResolutions.subtitle')}</span>
@@ -232,7 +241,6 @@ export default function CitizenHome() {
                         {t('home.recentResolutions.viewAll')} <ChevronRight className="w-4 h-4" />
                     </Link>
                 </div>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {RECENT_RESOLUTIONS.map((item) => (
                         <div key={item.id} className="civic-card p-4 flex items-start gap-3 hover:shadow-card-md transition-shadow">
@@ -244,15 +252,6 @@ export default function CitizenHome() {
                                 <div className="flex items-center gap-2 mt-1">
                                     <span className="badge badge-green text-xs">{item.category}</span>
                                     <span className="text-xs text-gray-400">{t('home.recentResolutions.ward')} {item.ward}</span>
-                                    <span className="text-xs text-gray-400 ml-auto">{item.daysAgo}d ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>          <p className="text-sm font-semibold text-gray-900 truncate">{item.issue}</p>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <span className="badge badge-green text-xs">{item.category}</span>
-                                    <span className="text-xs text-gray-400">{item.ward}</span>
                                     <span className="text-xs text-gray-400 ml-auto">{item.daysAgo}d ago</span>
                                 </div>
                             </div>
