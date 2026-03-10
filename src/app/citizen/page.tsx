@@ -231,7 +231,8 @@ export default function CitizenHome() {
                     <Link href="/public" className="btn-ghost text-civic-blue flex items-center gap-1">
                         {t('home.recentResolutions.viewAll')} <ChevronRight className="w-4 h-4" />
                     </Link>
-                </div>lassName="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+                </div>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {RECENT_RESOLUTIONS.map((item) => (
                         <div key={item.id} className="civic-card p-4 flex items-start gap-3 hover:shadow-card-md transition-shadow">
