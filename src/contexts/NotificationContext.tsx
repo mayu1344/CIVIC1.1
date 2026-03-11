@@ -6,7 +6,6 @@ import { notificationEvents, NOTIFICATION_EVENTS } from '@/lib/notificationEvent
 interface NotificationCounts {
     newComplaints: number;
     pendingComplaints: number;
-    departmentAlerts: number;
     slaBreached: number;
     highPriorityPending: number;
     escalatedComplaints: number;
@@ -25,7 +24,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     const [counts, setCounts] = useState<NotificationCounts>({
         newComplaints: 0,
         pendingComplaints: 0,
-        departmentAlerts: 0,
         slaBreached: 0,
         highPriorityPending: 0,
         escalatedComplaints: 0
@@ -53,7 +51,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
                         setCounts({
                             newComplaints: stats.pending || 0,
                             pendingComplaints: stats.pending || 0,
-                            departmentAlerts: Math.min(stats.pending || 0, 99),
                             slaBreached: stats.sla_breached || 0,
                             highPriorityPending: 0,
                             escalatedComplaints: stats.escalated || 0
@@ -72,8 +69,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         setCounts(prev => ({
             ...prev,
             newComplaints: prev.newComplaints + 1,
-            pendingComplaints: prev.pendingComplaints + 1,
-            departmentAlerts: Math.min(prev.departmentAlerts + 1, 99)
+            pendingComplaints: prev.pendingComplaints + 1
         }));
     };
 

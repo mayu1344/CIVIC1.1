@@ -29,80 +29,6 @@ exports.getDashboardStats = async (req, res, next) => {
     }
 };
 
-exports.getDepartmentStats = async (req, res, next) => {
-    try {
-        const query = `
-            SELECT 
-                d.id,
-                d.name,
-                d.code,
-                d.sla_hours,
-                d.is_active,
-                COUNT(c.id) as total_cases,
-                COUNT(CASE WHEN c.status = 'resolved' THEN 1 END) as resolved_cases,
-                COUNT(CASE WHEN c.status IN ('submitted', 'validated', 'assigned', 'in_progress') THEN 1 END) as pending_cases,
-                CASE 
-                    WHEN COUNT(c.id) > 0 THEN 
-                        ROUND((COUNT(CASE WHEN c.status = 'resolved' THEN 1 END)::numeric / COUNT(c.id)::numeric) * 100, 0)
-                    ELSE 0 
-                END as resolution_rate
-            FROM departments d
-            LEFT JOIN complaints c ON d.id = c.department_id AND c.deleted_at IS NULL
-            WHERE d.deleted_at IS NULL
-            GROUP BY d.id, d.name, d.code, d.sla_hours, d.is_active
-            ORDER BY d.name
-        `;
-        
-        const result = await pool.query(query);
-        
-        res.json({
-            success: true,
-            data: result.rows
-        });
-    } catch (error) {
-        logger.error('Error fetching department stats:', error);
-        next(error);
-    }
-};
-
-exports.getDepartments = async (req, res, next) => {
-    try {
-        const query = `SELECT * FROM v_department_statistics ORDER BY department_name`;
-        const result = await pool.query(query);
-        
-        res.json({
-            success: true,
-            data: result.rows
-        });
-    } catch (error) {
-        logger.error('Error fetching departments:', error);
-        next(error);
-    }
-};
-
-exports.createDepartment = async (req, res, next) => {
-    try {
-        const { name, code, description, contact_email, contact_phone } = req.body;
-        
-        const query = `
-            INSERT INTO departments (name, code, description, contact_email, contact_phone)
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING *
-        `;
-        
-        const result = await pool.query(query, [name, code, description, contact_email, contact_phone]);
-        
-        res.status(201).json({
-            success: true,
-            message: 'Department created successfully',
-            data: result.rows[0]
-        });
-    } catch (error) {
-        logger.error('Error creating department:', error);
-        next(error);
-    }
-};
-
 exports.getAnalytics = async (req, res, next) => {
     try {
         const { range = '30d' } = req.query;
@@ -350,15 +276,10 @@ exports.getNotificationCounts = async (req, res, next) => {
         const result = await pool.query(notificationQuery);
         const stats = result.rows[0];
         
-        // Calculate department alerts (combination of pending + SLA breached + escalated)
-        const departmentAlerts = parseInt(stats.pending_complaints) + 
-                               parseInt(stats.sla_breached) + 
-                               parseInt(stats.escalated_complaints);
-        
+        // Calculate notification counts (no department alerts since departments section is removed)
         const notificationCounts = {
             newComplaints: parseInt(stats.new_complaints) || 0,
             pendingComplaints: parseInt(stats.pending_complaints) || 0,
-            departmentAlerts: Math.min(departmentAlerts, 99), // Cap at 99 for display
             slaBreached: parseInt(stats.sla_breached) || 0,
             highPriorityPending: parseInt(stats.high_priority_pending) || 0,
             escalatedComplaints: parseInt(stats.escalated_complaints) || 0

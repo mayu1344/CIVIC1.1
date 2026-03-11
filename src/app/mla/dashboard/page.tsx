@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { MOCK_STATS, MOCK_TREND_DATA, MOCK_CATEGORY_DATA, MOCK_DEPARTMENTS, MOCK_OFFICERS } from "@/lib/mockData";
+import { MOCK_STATS, MOCK_TREND_DATA, MOCK_CATEGORY_DATA, MOCK_OFFICERS } from "@/lib/mockData";
 import { formatNumber, cn } from "@/lib/utils";
 import {
     TrendingUp, CheckCircle2, Clock, AlertTriangle, Users,
@@ -268,7 +268,7 @@ export default function MLADashboardPage() {
                             <div className="pt-3 border-t border-gray-100">
                                 <div className="flex items-center gap-2 text-xs text-gray-500">
                                     <Users className="w-3.5 h-3.5" />
-                                    {MOCK_OFFICERS.filter((o) => o.isActive).length} officers active across {MOCK_DEPARTMENTS.length} departments
+                                    {MOCK_OFFICERS.filter((o) => o.isActive).length} officers active
                                 </div>
                             </div>
                         </div>

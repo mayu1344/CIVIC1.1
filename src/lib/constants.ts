@@ -105,7 +105,6 @@ export const CITIZEN_NAV = [
 export const ADMIN_NAV = [
     { href: "/admin/dashboard", label: "Dashboard", icon: "LayoutDashboard" },
     { href: "/admin/complaints", label: "Complaints", icon: "FileText" },
-    { href: "/admin/departments", label: "Departments", icon: "Building2" },
     { href: "/admin/analytics", label: "Analytics", icon: "BarChart2" },
     { href: "/admin/announcements", label: "Announcements", icon: "Megaphone" },
     { href: "/admin/settings", label: "Settings", icon: "Settings" },

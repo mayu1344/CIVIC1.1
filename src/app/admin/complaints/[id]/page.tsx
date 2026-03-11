@@ -7,7 +7,7 @@ import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/Button";
 import { StatusBadge, PriorityBadge } from "@/components/ui/Badge";
 import { ComplaintStepper } from "@/components/ui/Stepper";
-import { MOCK_COMPLAINTS, MOCK_OFFICERS, MOCK_DEPARTMENTS } from "@/lib/mockData";
+import { MOCK_COMPLAINTS, MOCK_OFFICERS } from "@/lib/mockData";
 import { ComplaintStatus, COMPLAINT_STATUSES } from "@/lib/constants";
 import { complaintService } from "@/lib/services/complaint.service";
 import { formatDateTime, getSLAStatus, cn } from "@/lib/utils";
@@ -27,7 +27,6 @@ export default function ComplaintDetailPage({ params }: { params: { id: string }
     const [showAssignModal, setShowAssignModal] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [showEscalateModal, setShowEscalateModal] = useState(false);
-    const [selectedDept, setSelectedDept] = useState("");
     const [selectedOfficer, setSelectedOfficer] = useState("");
     const [newStatus, setNewStatus] = useState<ComplaintStatus>("submitted");
     const [statusNote, setStatusNote] = useState("");
@@ -345,32 +344,16 @@ export default function ComplaintDetailPage({ params }: { params: { id: string }
                         <h3 className="text-xl font-bold text-gray-900 mb-4">Assign Complaint</h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="label-field">Department *</label>
-                                <select
-                                    value={selectedDept}
-                                    onChange={(e) => setSelectedDept(e.target.value)}
-                                    className="input-field"
-                                >
-                                    <option value="">Select department</option>
-                                    {MOCK_DEPARTMENTS.map(dept => (
-                                        <option key={dept.id} value={dept.name}>{dept.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="label-field">Officer (Optional)</label>
+                                <label className="label-field">Officer *</label>
                                 <select
                                     value={selectedOfficer}
                                     onChange={(e) => setSelectedOfficer(e.target.value)}
                                     className="input-field"
-                                    disabled={!selectedDept}
                                 >
                                     <option value="">Select officer</option>
-                                    {MOCK_OFFICERS
-                                        .filter(o => o.department === selectedDept)
-                                        .map(officer => (
-                                            <option key={officer.id} value={officer.name}>{officer.name}</option>
-                                        ))}
+                                    {MOCK_OFFICERS.map(officer => (
+                                        <option key={officer.id} value={officer.name}>{officer.name}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>

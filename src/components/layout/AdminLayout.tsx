@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { ADMIN_NAV } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import {
-    LayoutDashboard, FileText, Building2, Users, BarChart2,
+    LayoutDashboard, FileText, Users, BarChart2,
     Settings, MapPin, Bell, ChevronDown, LogOut, Menu, X, Megaphone
 } from "lucide-react";
 import { useState } from "react";
@@ -13,7 +13,6 @@ import { NotificationProvider, useNotifications } from "@/contexts/NotificationC
 const ICONS: Record<string, React.ReactNode> = {
     LayoutDashboard: <LayoutDashboard className="w-4 h-4" />,
     FileText: <FileText className="w-4 h-4" />,
-    Building2: <Building2 className="w-4 h-4" />,
     Users: <Users className="w-4 h-4" />,
     BarChart2: <BarChart2 className="w-4 h-4" />,
     Megaphone: <Megaphone className="w-4 h-4" />,
@@ -63,8 +62,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                         let notificationCount = 0;
                         if (item.href === "/admin/complaints") {
                             notificationCount = counts.pendingComplaints;
-                        } else if (item.href === "/admin/departments") {
-                            notificationCount = counts.departmentAlerts;
                         }
 
                         return (
