@@ -1,6 +1,6 @@
 import api from '../api-client';
 import { ComplaintStatus, Priority } from '../constants';
-import { notificationEvents, NOTIFICATION_EVENTS } from './notificationEvents';
+import { notificationEvents, NOTIFICATION_EVENTS } from '../notificationEvents';
 
 export interface CreateComplaintDTO {
     title: string;
