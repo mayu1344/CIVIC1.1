@@ -1,5 +1,6 @@
 import api from '../api-client';
 import { ComplaintStatus, Priority } from '../constants';
+import { notificationEvents, NOTIFICATION_EVENTS } from './notificationEvents';
 
 export interface CreateComplaintDTO {
     title: string;
@@ -42,11 +43,18 @@ export const complaintService = {
             });
         }
         
-        return api.post('/complaints', formData, {
+        const response = await api.post('/complaints', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         });
+        
+        // Emit event to update notifications
+        if (response.data.success) {
+            notificationEvents.emit(NOTIFICATION_EVENTS.NEW_COMPLAINT, response.data.data);
+        }
+        
+        return response;
     },
 
     getComplaintByNumber: async (complaintNumber: string) => {
@@ -63,7 +71,14 @@ export const complaintService = {
     },
 
     updateStatus: async (id: string, status: ComplaintStatus, note?: string) => {
-        return api.patch(`/complaints/${id}/status`, { status, note });
+        const response = await api.patch(`/complaints/${id}/status`, { status, note });
+        
+        // Emit event to refresh notification counts when status changes
+        if (response.data.success) {
+            notificationEvents.emit(NOTIFICATION_EVENTS.REFRESH_COUNTS);
+        }
+        
+        return response;
     },
 
     assignComplaint: async (id: string, assignedDept: string, assignedOfficer?: string) => {

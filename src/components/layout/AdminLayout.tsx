@@ -8,6 +8,7 @@ import {
     Settings, MapPin, Bell, ChevronDown, LogOut, Menu, X, Megaphone
 } from "lucide-react";
 import { useState } from "react";
+import { NotificationProvider, useNotifications } from "@/contexts/NotificationContext";
 
 const ICONS: Record<string, React.ReactNode> = {
     LayoutDashboard: <LayoutDashboard className="w-4 h-4" />,
@@ -19,9 +20,10 @@ const ICONS: Record<string, React.ReactNode> = {
     Settings: <Settings className="w-4 h-4" />,
 };
 
-export function AdminLayout({ children }: { children: React.ReactNode }) {
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const { counts } = useNotifications();
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
@@ -56,27 +58,37 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 {/* Navigation */}
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
                     <p className="text-blue-300 text-xs font-semibold uppercase tracking-wider px-3 mb-3">Main Menu</p>
-                    {ADMIN_NAV.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setSidebarOpen(false)}
-                            className={cn(
-                                "sidebar-item",
-                                pathname === item.href || pathname.startsWith(item.href + "/")
-                                    ? "sidebar-item-active"
-                                    : "sidebar-item-inactive"
-                            )}
-                        >
-                            {ICONS[item.icon]}
-                            <span>{item.label}</span>
-                            {item.href === "/admin/complaints" && (
-                                <span className="ml-auto bg-civic-orange text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                                    5
-                                </span>
-                            )}
-                        </Link>
-                    ))}
+                    {ADMIN_NAV.map((item) => {
+                        // Determine notification count for each item
+                        let notificationCount = 0;
+                        if (item.href === "/admin/complaints") {
+                            notificationCount = counts.pendingComplaints;
+                        } else if (item.href === "/admin/departments") {
+                            notificationCount = counts.departmentAlerts;
+                        }
+
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => setSidebarOpen(false)}
+                                className={cn(
+                                    "sidebar-item",
+                                    pathname === item.href || pathname.startsWith(item.href + "/")
+                                        ? "sidebar-item-active"
+                                        : "sidebar-item-inactive"
+                                )}
+                            >
+                                {ICONS[item.icon]}
+                                <span>{item.label}</span>
+                                {notificationCount > 0 && (
+                                    <span className="ml-auto bg-civic-orange text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                        {notificationCount > 99 ? '99+' : notificationCount}
+                                    </span>
+                                )}
+                            </Link>
+                        );
+                    })}
                 </nav>
 
                 {/* User / Logout */}
@@ -121,7 +133,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                     <div className="flex items-center gap-2">
                         <button className="relative p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors">
                             <Bell className="w-5 h-5" />
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-civic-orange rounded-full" />
+                            {(counts.newComplaints + counts.slaBreached + counts.escalatedComplaints) > 0 && (
+                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-civic-orange rounded-full" />
+                            )}
                         </button>
                         <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer border border-gray-200">
                             <div className="w-6 h-6 rounded-full bg-civic-blue flex items-center justify-center">
@@ -139,5 +153,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 </main>
             </div>
         </div>
+    );
+}
+
+export function AdminLayout({ children }: { children: React.ReactNode }) {
+    return (
+        <NotificationProvider>
+            <AdminLayoutContent>{children}</AdminLayoutContent>
+        </NotificationProvider>
     );
 }

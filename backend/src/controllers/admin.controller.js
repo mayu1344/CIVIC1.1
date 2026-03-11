@@ -316,3 +316,63 @@ exports.createOfficer = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.getNotificationCounts = async (req, res, next) => {
+    try {
+        // Get current timestamp for SLA calculations
+        const now = new Date();
+        
+        // Query to get various notification counts
+        const notificationQuery = `
+            SELECT 
+                -- New complaints (submitted in last 24 hours)
+                COUNT(CASE WHEN created_at >= CURRENT_TIMESTAMP - INTERVAL '24 hours' 
+                          AND status = 'submitted' THEN 1 END) as new_complaints,
+                
+                -- Pending complaints (all non-resolved/closed)
+                COUNT(CASE WHEN status IN ('submitted', 'validated', 'assigned', 'in_progress') THEN 1 END) as pending_complaints,
+                
+                -- SLA breached complaints
+                COUNT(CASE WHEN sla_deadline < CURRENT_TIMESTAMP 
+                          AND status NOT IN ('resolved', 'closed') THEN 1 END) as sla_breached,
+                
+                -- High priority pending complaints
+                COUNT(CASE WHEN priority IN ('high', 'critical') 
+                          AND status IN ('submitted', 'validated', 'assigned', 'in_progress') THEN 1 END) as high_priority_pending,
+                
+                -- Escalated complaints
+                COUNT(CASE WHEN is_escalated = true 
+                          AND status NOT IN ('resolved', 'closed') THEN 1 END) as escalated_complaints
+            FROM complaints
+            WHERE deleted_at IS NULL
+        `;
+        
+        const result = await pool.query(notificationQuery);
+        const stats = result.rows[0];
+        
+        // Calculate department alerts (combination of pending + SLA breached + escalated)
+        const departmentAlerts = parseInt(stats.pending_complaints) + 
+                               parseInt(stats.sla_breached) + 
+                               parseInt(stats.escalated_complaints);
+        
+        const notificationCounts = {
+            newComplaints: parseInt(stats.new_complaints) || 0,
+            pendingComplaints: parseInt(stats.pending_complaints) || 0,
+            departmentAlerts: Math.min(departmentAlerts, 99), // Cap at 99 for display
+            slaBreached: parseInt(stats.sla_breached) || 0,
+            highPriorityPending: parseInt(stats.high_priority_pending) || 0,
+            escalatedComplaints: parseInt(stats.escalated_complaints) || 0
+        };
+        
+        logger.info('Notification counts fetched:', notificationCounts);
+        
+        res.json({
+            success: true,
+            data: notificationCounts
+        });
+     
+   } catch (error) {
+        logger.error('Error fetching notification counts:', error);
+        next(error);
+    }
+};

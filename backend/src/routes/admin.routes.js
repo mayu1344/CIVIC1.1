@@ -10,3 +10,4 @@ router.get('/officers', adminController.getAllOfficers);
 router.post('/officers', adminController.createOfficer);
 
 module.exports = router;
+router.get('/notifications', adminController.getNotificationCounts);
