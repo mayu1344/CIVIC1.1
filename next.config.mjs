@@ -1,7 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['res.cloudinary.com'],
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'res.cloudinary.com',
+                port: '',
+                pathname: '/**',
+            },
+        ],
         unoptimized: true,
     },
     eslint: {
@@ -10,9 +17,7 @@ const nextConfig = {
     typescript: {
         ignoreBuildErrors: true,
     },
-    experimental: {
-        serverComponentsExternalPackages: ['pg'],
-    },
+    serverExternalPackages: ['pg'],
     // Vercel optimizations
     output: 'standalone',
     poweredByHeader: false,
