@@ -129,6 +129,7 @@ async function startServer() {
         // Test database connection
         await testConnection();
         logger.info('✅ Database connected successfully');
+        logger.info('🔐 Authentication routes loaded');
 
         // Start listening
         server.listen(PORT, () => {
