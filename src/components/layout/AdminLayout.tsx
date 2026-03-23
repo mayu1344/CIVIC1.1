@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ADMIN_NAV } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import {
@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { NotificationProvider, useNotifications } from "@/contexts/NotificationContext";
+import { useAdminRole } from "@/contexts/AdminRoleContext";
 
 const ICONS: Record<string, React.ReactNode> = {
     LayoutDashboard: <LayoutDashboard className="w-4 h-4" />,
@@ -21,8 +22,15 @@ const ICONS: Record<string, React.ReactNode> = {
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const router = useRouter();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const { counts } = useNotifications();
+    const { user, logout } = useAdminRole();
+
+    const handleLogout = () => {
+        logout();
+        router.push('/admin-login');
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
@@ -92,20 +100,24 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                 <div className="p-4 border-t border-white/10">
                     <div className="flex items-center gap-3 px-3 py-2.5">
                         <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                            <span className="text-white text-sm font-bold">A</span>
+                            <span className="text-white text-sm font-bold">
+                                {user?.email?.charAt(0).toUpperCase() || 'A'}
+                            </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-white text-sm font-medium truncate">Admin User</p>
-                            <p className="text-blue-300 text-xs truncate">ops_desk</p>
+                            <p className="text-white text-sm font-medium truncate">
+                                {user?.role === 'admin' ? 'Admin User' : 'MLA User'}
+                            </p>
+                            <p className="text-blue-300 text-xs truncate">{user?.email || 'admin@civicpath.com'}</p>
                         </div>
                     </div>
-                    <Link
-                        href="/admin/login"
-                        className="flex items-center gap-2 px-3 py-2 text-blue-200 hover:text-white text-sm rounded-lg hover:bg-white/5 transition-colors mt-1"
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 px-3 py-2 text-blue-200 hover:text-white text-sm rounded-lg hover:bg-white/5 transition-colors mt-1 w-full"
                     >
                         <LogOut className="w-4 h-4" />
                         Sign Out
-                    </Link>
+                    </button>
                 </div>
             </aside>
 

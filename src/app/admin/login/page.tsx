@@ -1,142 +1,231 @@
 "use client";
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Button } from "@/components/ui/Button";
-import { MapPin, Eye, EyeOff, Shield, Lock } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { authService } from "@/lib/services/auth.service";
-import toast from "react-hot-toast";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { 
+    MapPin, 
+    Mail, 
+    Lock, 
+    Eye, 
+    EyeOff, 
+    LogIn, 
+    Shield, 
+    AlertCircle,
+    Loader2
+} from 'lucide-react';
 
-const schema = z.object({
-    email: z.string().email("Enter a valid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type FormData = z.infer<typeof schema>;
+interface LoginCredentials {
+    email: string;
+    password: string;
+}
 
 export default function AdminLoginPage() {
-    const router = useRouter();
-    const [showPass, setShowPass] = useState(false);
-    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
-        resolver: zodResolver(schema),
+    const [credentials, setCredentials] = useState<LoginCredentials>({
+        email: '',
+        password: ''
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    
+    const router = useRouter();
 
-    const onSubmit = async (data: FormData) => {
+    // Check for existing session ONLY if there is one, don't show loading by default
+    useEffect(() => {
+        const storedUser = localStorage.getItem('civicpath_user');
+        if (storedUser) {
+            try {
+                const userData = JSON.parse(storedUser);
+                const loginTime = new Date(userData.loginTime);
+                const now = new Date();
+                const hoursDiff = (now.getTime() - loginTime.getTime()) / (1000 * 60 * 60);
+                
+                if (hoursDiff < 24) {
+                    // Valid session - redirect immediately
+                    if (userData.role === 'admin') {
+                        router.push('/admin/dashboard');
+                    } else if (userData.role === 'mla') {
+                        router.push('/mla/dashboard');
+                    }
+                } else {
+                    // Expired session - clear it
+                    localStorage.removeItem('civicpath_user');
+                }
+            } catch (error) {
+                localStorage.removeItem('civicpath_user');
+            }
+        }
+        // No loading state needed - form shows immediately
+    }, [router]);
+
+    const handleInputChange = (field: keyof LoginCredentials, value: string) => {
+        setCredentials(prev => ({ ...prev, [field]: value }));
+        if (error) setError(null);
+    };
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError(null);
+
         try {
-            await authService.login({
-                email: data.email,
-                password: data.password
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const response = await fetch(`${apiUrl}/api/v1/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: credentials.email,
+                    password: credentials.password
+                })
             });
-            toast.success("Welcome back, Admin!");
-            router.push("/admin/dashboard");
-        } catch (error: any) {
-            console.error("Login failed:", error);
-            const message = error.response?.data?.message || "Invalid credentials. (Demo: admin@civic.gov / admin123)";
-            toast.error(message);
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                localStorage.setItem('civicpath_user', JSON.stringify(data.data));
+
+                if (data.data.role === 'admin') {
+                    router.push('/admin/dashboard');
+                } else if (data.data.role === 'mla') {
+                    router.push('/mla/dashboard');
+                }
+            } else {
+                throw new Error(data.error || 'Login failed');
+            }
+
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Login failed');
+        } finally {
+            setIsLoading(false);
         }
     };
 
+    // Always show the login form - no loading screen for first-time visitors
     return (
-        <div className="min-h-screen bg-gradient-hero flex items-center justify-center px-4 relative overflow-hidden">
-            {/* Background Shapes */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-32 -left-32 w-96 h-96 bg-white/5 rounded-full" />
-                <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-white/5 rounded-full" />
-                <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-white/3 rounded-full -translate-y-1/2" />
-            </div>
-
-            <div className="w-full max-w-md relative z-10">
-                {/* Logo */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center gap-2.5 bg-white/10 px-5 py-3 rounded-2xl border border-white/15 backdrop-blur-sm mb-5">
-                        <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                            <MapPin className="w-4 h-4 text-white" />
+        <div className="min-h-screen bg-gradient-to-br from-civic-blue via-blue-600 to-blue-800 flex items-center justify-center p-4">
+            <div className="absolute inset-0 opacity-20" style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+            }}></div>
+            
+            <div className="relative w-full max-w-md">
+                <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
+                    <div className="text-center mb-8">
+                        <div className="inline-flex items-center justify-center w-16 h-16 bg-civic-blue rounded-2xl mb-4">
+                            <Shield className="w-8 h-8 text-white" />
                         </div>
-                        <div className="text-left">
-                            <p className="text-white font-bold text-lg leading-none">CivicPath</p>
-                            <p className="text-blue-200 text-xs">Admin Console</p>
-                        </div>
+                        <h1 className="text-2xl font-black text-gray-900 mb-2">Admin Portal</h1>
+                        <p className="text-gray-500 text-sm">Sign in to access your dashboard</p>
                     </div>
-                    <h1 className="text-2xl font-black text-white">Welcome Back</h1>
-                    <p className="text-blue-200 text-sm mt-1">Sign in to access the Admin Console</p>
-                </div>
 
-                {/* Form Card */}
-                <div className="glass rounded-3xl p-8 shadow-card-xl">
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    {error && (
+                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+                            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                            <p className="text-red-700 text-sm">{error}</p>
+                        </div>
+                    )}
+
+                    <form onSubmit={handleLogin} className="space-y-6">
                         <div>
-                            <label className="label-field">Email Address</label>
-                            <input
-                                {...register("email")}
-                                type="email"
-                                placeholder="admin@civic.gov"
-                                className={cn("input-field", errors.email && "input-field-error")}
-                            />
-                            {errors.email && <p className="error-text">{errors.email.message}</p>}
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Email Address
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Mail className="w-5 h-5 text-gray-400" />
+                                </div>
+                                <input
+                                    type="email"
+                                    value={credentials.email}
+                                    onChange={(e) => handleInputChange('email', e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-civic-blue focus:border-transparent transition-colors"
+                                    placeholder="Enter your email"
+                                    required
+                                />
+                            </div>
                         </div>
 
                         <div>
-                            <label className="label-field">Password</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Password
+                            </label>
                             <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Lock className="w-5 h-5 text-gray-400" />
+                                </div>
                                 <input
-                                    {...register("password")}
-                                    type={showPass ? "text" : "password"}
-                                    placeholder="••••••••"
-                                    className={cn("input-field pr-11", errors.password && "input-field-error")}
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={credentials.password}
+                                    onChange={(e) => handleInputChange('password', e.target.value)}
+                                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-civic-blue focus:border-transparent transition-colors"
+                                    placeholder="Enter your password"
+                                    required
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => setShowPass(!showPass)}
-                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
                                 >
-                                    {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    {showPassword ? (
+                                        <EyeOff className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                                    ) : (
+                                        <Eye className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                                    )}
                                 </button>
                             </div>
-                            {errors.password && <p className="error-text">{errors.password.message}</p>}
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" className="rounded border-gray-300 text-civic-blue" />
-                                <span className="text-sm text-gray-600">Remember me</span>
-                            </label>
-                            <button type="button" className="text-sm text-civic-blue font-medium hover:underline">
-                                Forgot password?
-                            </button>
-                        </div>
-
-                        <Button type="submit" loading={isSubmitting} className="w-full py-3 text-base">
-                            <Lock className="w-4 h-4" />
-                            Sign In Securely
-                        </Button>
+                        <button
+                            type="submit"
+                            disabled={isLoading || !credentials.email || !credentials.password}
+                            className="w-full bg-civic-blue text-white py-3 px-4 rounded-xl font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-civic-blue focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    Signing in...
+                                </>
+                            ) : (
+                                <>
+                                    <LogIn className="w-5 h-5" />
+                                    Sign In
+                                </>
+                            )}
+                        </button>
                     </form>
 
-                    <div className="mt-5 p-3.5 bg-blue-50 rounded-xl border border-blue-100">
-                        <div className="flex items-start gap-2">
-                            <Shield className="w-4 h-4 text-civic-blue flex-shrink-0 mt-0.5" />
-                            <div className="text-xs text-gray-600">
-                                <strong>Demo credentials:</strong><br />
-                                Email: admin@civic.gov<br />
-                                Password: admin123
+                    <div className="mt-8 p-4 bg-gray-50 rounded-xl">
+                        <h3 className="text-sm font-semibold text-gray-700 mb-3">Database Credentials:</h3>
+                        <div className="space-y-2 text-xs text-gray-600">
+                            <div className="flex justify-between">
+                                <span className="font-medium">Admin:</span>
+                                <span>admin@civicpath.com / admin123</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="font-medium">MLA:</span>
+                                <span>mla@civicpath.com / mla123</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-5 text-center">
-                        <Link href="/citizen" className="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                    <div className="mt-6 text-center">
+                        <Link 
+                            href="/citizen" 
+                            className="text-sm text-civic-blue hover:text-blue-700 font-medium"
+                        >
                             ← Back to Citizen Portal
                         </Link>
                     </div>
                 </div>
 
-                <p className="text-center text-blue-300 text-xs mt-5">
-                    Powered by Cascade Technologies Solutions<br />
-                    Secured with 256-bit SSL encryption
-                </p>
+                <div className="text-center mt-6">
+                    <div className="flex items-center justify-center gap-2 text-white/80">
+                        <MapPin className="w-5 h-5" />
+                        <span className="font-semibold">CivicPath</span>
+                    </div>
+                    <p className="text-white/60 text-sm mt-1">Connecting Citizens with Government</p>
+                </div>
             </div>
         </div>
     );

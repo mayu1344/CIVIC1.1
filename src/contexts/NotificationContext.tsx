@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { notificationEvents, NOTIFICATION_EVENTS } from '@/lib/notificationEvents';
+import api from '@/lib/api-client';
 
 interface NotificationCounts {
     newComplaints: number;
@@ -32,30 +33,23 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
     const fetchNotificationCounts = async () => {
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            // Use API client with proper authentication headers
+            const data = await api.get('/admin/notifications');
             
-            const response = await fetch(`${apiUrl}/api/v1/admin/notifications`);
-            
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    setCounts(data.data);
-                }
+            if (data.success) {
+                setCounts(data.data);
             } else {
                 // Fallback: fetch stats and calculate counts
-                const statsResponse = await fetch(`${apiUrl}/api/v1/admin/stats`);
-                if (statsResponse.ok) {
-                    const statsData = await statsResponse.json();
-                    if (statsData.success) {
-                        const stats = statsData.data;
-                        setCounts({
-                            newComplaints: stats.pending || 0,
-                            pendingComplaints: stats.pending || 0,
-                            slaBreached: stats.sla_breached || 0,
-                            highPriorityPending: 0,
-                            escalatedComplaints: stats.escalated || 0
-                        });
-                    }
+                const statsData = await api.get('/admin/stats');
+                if (statsData.success) {
+                    const stats = statsData.data;
+                    setCounts({
+                        newComplaints: stats.pending || 0,
+                        pendingComplaints: stats.pending || 0,
+                        slaBreached: stats.sla_breached || 0,
+                        highPriorityPending: 0,
+                        escalatedComplaints: stats.escalated || 0
+                    });
                 }
             }
         } catch (error) {

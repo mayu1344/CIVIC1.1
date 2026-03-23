@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
+        domains: ['res.cloudinary.com'],
         unoptimized: true,
     },
     eslint: {
@@ -10,8 +11,12 @@ const nextConfig = {
         ignoreBuildErrors: true,
     },
     experimental: {
-        missingSuspenseWithCSRBailout: false,
+        serverComponentsExternalPackages: ['pg'],
     },
+    // Vercel optimizations
+    output: 'standalone',
+    poweredByHeader: false,
+    compress: true,
 };
 
 export default nextConfig;

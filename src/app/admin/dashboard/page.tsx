@@ -1,5 +1,7 @@
 "use client";
 import { AdminLayout } from "@/components/layout/AdminLayout";
+import { AdminRoleProvider } from "@/contexts/AdminRoleContext";
+import { AdminRoleGuard } from "@/components/auth/AdminRoleGuard";
 import { KPICard } from "@/components/ui/Card";
 import { StatusBadge, PriorityBadge } from "@/components/ui/Badge";
 import { formatDateTime, getSLAStatus, cn } from "@/lib/utils";
@@ -13,9 +15,10 @@ import {
     LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
+import api from "@/lib/api-client";
 import toast from "react-hot-toast";
 
-export default function AdminDashboardPage() {
+function AdminDashboardContent() {
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState<any>(null);
     const [complaints, setComplaints] = useState<any[]>([]);
@@ -28,29 +31,22 @@ export default function AdminDashboardPage() {
     const fetchDashboardData = async () => {
         try {
             setLoading(true);
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
             
-            // Fetch stats and complaints in parallel
-            const [statsRes, complaintsRes] = await Promise.all([
-                fetch(`${apiUrl}/api/v1/admin/stats`),
-                fetch(`${apiUrl}/api/v1/complaints?limit=5`)
+            // Use API client with proper authentication headers
+            const [statsData, complaintsData] = await Promise.all([
+                api.get('/admin/stats'),
+                api.get('/complaints?limit=5')
             ]);
 
-            if (statsRes.ok) {
-                const statsData = await statsRes.json();
-                if (statsData.success) {
-                    setStats(statsData.data);
-                }
+            if (statsData.success) {
+                setStats(statsData.data);
             }
 
-            if (complaintsRes.ok) {
-                const complaintsData = await complaintsRes.json();
-                if (complaintsData.success) {
-                    const complaintsArray = Array.isArray(complaintsData.data) 
-                        ? complaintsData.data 
-                        : complaintsData.data.complaints || [];
-                    setComplaints(complaintsArray.slice(0, 4));
-                }
+            if (complaintsData.success) {
+                const complaintsArray = Array.isArray(complaintsData.data) 
+                    ? complaintsData.data 
+                    : complaintsData.data.complaints || [];
+                setComplaints(complaintsArray.slice(0, 4));
             }
         } catch (error: any) {
             console.error('Error fetching dashboard data:', error);
@@ -225,5 +221,13 @@ export default function AdminDashboardPage() {
                 </div>
             </div>
         </AdminLayout>
+    );
+}
+
+export default function AdminDashboardPage() {
+    return (
+        <AdminRoleGuard requiredRole="admin">
+            <AdminDashboardContent />
+        </AdminRoleGuard>
     );
 }

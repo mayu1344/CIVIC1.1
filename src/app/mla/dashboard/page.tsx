@@ -1,6 +1,10 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { AdminRoleProvider } from "@/contexts/AdminRoleContext";
+import { AdminRoleGuard } from "@/components/auth/AdminRoleGuard";
+import { useAdminRole } from "@/contexts/AdminRoleContext";
 import { MOCK_STATS, MOCK_TREND_DATA, MOCK_CATEGORY_DATA, MOCK_OFFICERS } from "@/lib/mockData";
 import { formatNumber, cn } from "@/lib/utils";
 import {
@@ -21,7 +25,9 @@ const SLA_TREND = [
     { month: "Feb", rate: 91 },
 ];
 
-export default function MLADashboardPage() {
+function MLADashboardContent() {
+    const router = useRouter();
+    const { user, logout } = useAdminRole();
     const [departmentPerformance, setDepartmentPerformance] = useState([]);
     const [stats, setStats] = useState({
         totalIssues: 0,
@@ -92,7 +98,8 @@ export default function MLADashboardPage() {
     };
 
     const handleLogout = () => {
-        window.location.href = "/";
+        logout();
+        router.push('/admin-login');
     };
 
     return (
@@ -276,5 +283,15 @@ export default function MLADashboardPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function MLADashboardPage() {
+    return (
+        <AdminRoleGuard requiredRole="mla">
+            <MLADashboardContent />
+        </AdminRoleGuard>
+    );
+}
     );
 }

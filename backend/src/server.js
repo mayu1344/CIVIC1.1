@@ -17,6 +17,7 @@ const officerRoutes = require('./routes/officer.routes');
 const adminRoutes = require('./routes/admin.routes');
 const mlaRoutes = require('./routes/mla.routes');
 const uploadRoutes = require('./routes/upload.routes');
+const authRoutes = require('./routes/auth.routes');
 
 // Initialize Express app
 const app = express();
@@ -82,6 +83,7 @@ app.use(`/api/${apiVersion}/officers`, officerRoutes);
 app.use(`/api/${apiVersion}/admin`, adminRoutes);
 app.use(`/api/${apiVersion}/mla`, mlaRoutes);
 app.use(`/api/${apiVersion}/upload`, uploadRoutes);
+app.use(`/api/${apiVersion}/auth`, authRoutes);
 
 // 404 handler
 app.use((req, res) => {

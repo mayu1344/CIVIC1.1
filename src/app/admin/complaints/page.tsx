@@ -10,12 +10,22 @@ import {
     Search, Filter, Download, Eye, ChevronDown,
     AlertTriangle, CheckSquare, Copy, ChevronLeft, ChevronRight, Loader2, Image as ImageIcon, MapPin
 } from "lucide-react";
+import { AdminRoleGuard } from "@/components/auth/AdminRoleGuard";
+import api from "@/lib/api-client";
 import toast from "react-hot-toast";
 
 const STATUSES_FILTER = ["all", ...COMPLAINT_STATUSES] as const;
 const PRIORITIES_FILTER = ["all", ...PRIORITIES] as const;
 
 export default function ComplaintsPage() {
+    return (
+        <AdminRoleGuard requiredRole="admin">
+            <ComplaintsPageContent />
+        </AdminRoleGuard>
+    );
+}
+
+function ComplaintsPageContent() {
     const [complaints, setComplaints] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -35,20 +45,14 @@ export default function ComplaintsPage() {
         try {
             setLoading(true);
             setError(null);
-            // Use environment variable or fallback to localhost
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-            const response = await fetch(`${apiUrl}/api/v1/complaints`);
             
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            // Use API client with proper authentication headers
+            const response: any = await api.get('/complaints');
+            console.log('API Response:', response); // Debug log
             
-            const data = await response.json();
-            console.log('API Response:', data); // Debug log
-            
-            if (data.success && data.data) {
+            if (response.success && response.data) {
                 // Handle both array and paginated response
-                const complaintsData = Array.isArray(data.data) ? data.data : data.data.complaints || [];
+                const complaintsData = Array.isArray(response.data) ? response.data : response.data.complaints || [];
                 console.log('Complaints loaded:', complaintsData.length); // Debug log
                 setComplaints(complaintsData);
             } else {
