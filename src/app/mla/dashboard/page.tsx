@@ -9,8 +9,11 @@ import { MOCK_STATS, MOCK_TREND_DATA, MOCK_CATEGORY_DATA, MOCK_OFFICERS } from "
 import { formatNumber, cn } from "@/lib/utils";
 import {
     TrendingUp, CheckCircle2, Clock, AlertTriangle, Users,
-    MapPin, Star, Download, Share2, LogOut, BarChart2
+    MapPin, Star, Download, Share2, LogOut, BarChart2, UserPlus
 } from "lucide-react";
+import CreateOfficerModal from "@/components/mla/CreateOfficerModal";
+import OfficersList from "@/components/mla/OfficersList";
+import toast from "react-hot-toast";
 import {
     LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
@@ -30,71 +33,78 @@ function MLADashboardContent() {
     const { user, logout } = useAdminRole();
     const [departmentPerformance, setDepartmentPerformance] = useState([]);
     const [stats, setStats] = useState({
-        totalIssues: 0,
-        resolved: 0,
-        pending: 0,
-        totalTrend: '+0%',
-        resolvedTrend: '+0%'
+        totalIssues: 0, resolved: 0, pending: 0, totalTrend: '+0%', resolvedTrend: '+0%'
     });
     const [loading, setLoading] = useState(true);
+    const [showCreateOfficer, setShowCreateOfficer] = useState(false);
+    const [officers, setOfficers] = useState<any[]>([]);
+    const [backendOnline, setBackendOnline] = useState(false);
     const topOfficers = [...MOCK_OFFICERS].sort((a, b) => b.performanceScore - a.performanceScore).slice(0, 3);
 
     useEffect(() => {
-        // Initial fetch
         fetchDepartmentPerformance();
         fetchStats();
+        fetchOfficers();
 
-        // Auto-refresh every 10 seconds
-        const statsInterval = setInterval(() => {
-            fetchStats();
-        }, 10000);
-
-        const deptInterval = setInterval(() => {
-            fetchDepartmentPerformance();
-        }, 30000);
-
-        // Cleanup intervals on unmount
-        return () => {
-            clearInterval(statsInterval);
-            clearInterval(deptInterval);
-        };
+        // Only auto-refresh if backend is reachable — check every 30s
+        const statsInterval = setInterval(() => { fetchStats(); }, 30000);
+        const deptInterval = setInterval(() => { fetchDepartmentPerformance(); }, 60000);
+        return () => { clearInterval(statsInterval); clearInterval(deptInterval); };
     }, []);
+
+    const fetchOfficers = async () => {
+        try {
+            const storedUser = localStorage.getItem('civicpath_user');
+            const userData = storedUser ? JSON.parse(storedUser) : null;
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const res = await fetch(`${apiUrl}/api/v1/officers`, {
+                headers: { 'x-user-email': userData?.email || '' }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setOfficers(data.data);
+                setBackendOnline(true);
+            }
+        } catch { /* silent fail */ }
+    };
 
     const fetchStats = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/v1/complaints/stats/dashboard');
+            const storedUser = localStorage.getItem('civicpath_user');
+            const userData = storedUser ? JSON.parse(storedUser) : null;
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const response = await fetch(`${apiUrl}/api/v1/complaints/stats/dashboard`, {
+                headers: { 'x-user-email': userData?.email || '' }
+            });
             const data = await response.json();
             if (data.success) {
                 const statsData = data.data;
                 const total = parseInt(statsData.total_complaints) || 0;
                 const resolved = parseInt(statsData.resolved) || 0;
                 const pending = parseInt(statsData.submitted) + parseInt(statsData.in_progress) || 0;
-                
                 setStats({
                     totalIssues: total,
                     resolved: resolved,
                     pending: pending,
-                    totalTrend: '+12%', // Can be calculated from historical data
+                    totalTrend: '+12%',
                     resolvedTrend: '+8%'
                 });
             }
-        } catch (error) {
-            console.error('Error fetching stats:', error);
-        }
+        } catch { /* silent fail */ }
     };
 
     const fetchDepartmentPerformance = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/v1/mla/department-performance');
+            const storedUser = localStorage.getItem('civicpath_user');
+            const userData = storedUser ? JSON.parse(storedUser) : null;
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const response = await fetch(`${apiUrl}/api/v1/mla/department-performance`, {
+                headers: { 'x-user-email': userData?.email || '' }
+            });
             const data = await response.json();
-            if (data.success) {
-                setDepartmentPerformance(data.data);
-            }
-        } catch (error) {
-            console.error('Error fetching department performance:', error);
-        } finally {
-            setLoading(false);
-        }
+            if (data.success) setDepartmentPerformance(data.data);
+        } catch { /* silent fail */ }
+        finally { setLoading(false); }
     };
 
     const handleLogout = () => {
@@ -138,6 +148,17 @@ function MLADashboardContent() {
                     <h1 className="text-2xl font-black text-gray-900">Executive Dashboard</h1>
                     <p className="text-gray-500 text-sm mt-1">Constituency Performance Overview — February 2024</p>
                 </div>
+
+                {/* Backend offline warning */}
+                {!backendOnline && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center gap-3">
+                        <span className="text-amber-500 text-lg">⚠️</span>
+                        <div>
+                            <p className="text-sm font-semibold text-amber-800">Backend not running</p>
+                            <p className="text-xs text-amber-600">Run <code className="bg-amber-100 px-1 rounded">node backend/src/server.js</code> to load live data and officers</p>
+                        </div>
+                    </div>
+                )}
 
                 {/* KPI Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -197,62 +218,8 @@ function MLADashboardContent() {
                     </div>
                 </div>
 
-                {/* Dept Ranking + Officers */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Dept Ranking */}
-                    <div className="civic-card p-5">
-                        <h3 className="section-title mb-5">Department Performance Ranking</h3>
-                        {loading ? (
-                            <div className="text-center py-8 text-gray-400">Loading...</div>
-                        ) : departmentPerformance.length === 0 ? (
-                            <div className="text-center py-8">
-                                <p className="text-gray-400 mb-2">No department data available</p>
-                                <p className="text-xs text-gray-400">Assign complaints to departments to see performance rankings</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {departmentPerformance.map((d, i) => (
-                                    <div key={d.id} className="flex items-center gap-3">
-                                        <span className={cn(
-                                            "w-7 h-7 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0",
-                                            i === 0 ? "bg-yellow-100 text-yellow-700" :
-                                                i === 1 ? "bg-gray-100 text-gray-600" :
-                                                    i === 2 ? "bg-orange-100 text-orange-700" : "bg-gray-50 text-gray-400"
-                                        )}>
-                                            {i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1}
-                                        </span>
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between mb-1">
-                                                <span className="text-sm font-semibold text-gray-800">{d.department_name}</span>
-                                                <div className="flex items-center gap-3 text-xs text-gray-500">
-                                                    <span>{d.resolved_count} resolved</span>
-                                                    <span className={cn("font-bold", 
-                                                        d.sla_compliance >= 85 ? "text-civic-green" : 
-                                                        d.sla_compliance >= 75 ? "text-civic-orange" : "text-red-500"
-                                                    )}>
-                                                        {d.sla_compliance || 0}% SLA
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className="w-full h-1.5 bg-gray-100 rounded-full">
-                                                <div
-                                                    className={cn("h-full rounded-full", 
-                                                        i === 0 ? "bg-civic-green" : 
-                                                        i === 1 ? "bg-blue-500" : 
-                                                        i === 2 ? "bg-civic-orange" : "bg-gray-400"
-                                                    )}
-                                                    style={{ width: `${d.performance_score}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                        <span className="text-xs font-black text-gray-600 w-8 text-right">{d.performance_score}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Top Officers */}
+                {/* Top Officers */}
+                <div className="grid grid-cols-1 gap-6">
                     <div className="civic-card p-5">
                         <h3 className="section-title mb-5">Top Performing Officers</h3>
                         <div className="space-y-4">
@@ -281,6 +248,42 @@ function MLADashboardContent() {
                         </div>
                     </div>
                 </div>
+
+                {/* Officer Management */}
+                <div className="civic-card p-5">
+                    <div className="flex items-center justify-between mb-5">
+                        <div>
+                            <h3 className="section-title">Officer Management</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">{officers.length} officer{officers.length !== 1 ? 's' : ''} created</p>
+                        </div>
+                        <button
+                            onClick={() => setShowCreateOfficer(true)}
+                            className="flex items-center gap-2 bg-civic-blue text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                        >
+                            <UserPlus className="w-4 h-4" />
+                            Create Officer
+                        </button>
+                    </div>
+                    <OfficersList
+                        officers={officers}
+                        onStatusChange={(id, status) =>
+                            setOfficers(prev => prev.map(o => o.id === id ? { ...o, status } : o))
+                        }
+                        onDelete={(id) => setOfficers(prev => prev.filter(o => o.id !== id))}
+                    />
+                </div>
+
+                {/* Create Officer Modal */}
+                {showCreateOfficer && (
+                    <CreateOfficerModal
+                        onClose={() => setShowCreateOfficer(false)}
+                        onSuccess={(newOfficer) => {
+                            setOfficers(prev => [newOfficer, ...prev]);
+                            setShowCreateOfficer(false);
+                            toast.success(`Officer ${newOfficer.name} created successfully!`);
+                        }}
+                    />
+                )}
             </div>
         </div>
     );

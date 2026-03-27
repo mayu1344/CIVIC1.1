@@ -1,9 +1,6 @@
 @echo off
-echo ========================================
-echo Starting CivicPath Backend API Server
-echo ========================================
+echo Starting CivicPath Backend...
+echo Keep this window open while using the app.
 echo.
-echo Backend will start on: http://localhost:5000
-echo.
-cd backend
-npm run dev
+node backend/src/server.js
+pause
