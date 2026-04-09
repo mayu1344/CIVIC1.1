@@ -31,27 +31,26 @@ function AdminDashboardContent() {
     const fetchDashboardData = async () => {
         try {
             setLoading(true);
-            
-            // Use API client with proper authentication headers
             const [statsData, complaintsData] = await Promise.all([
                 api.get('/admin/stats'),
                 api.get('/complaints?limit=5')
             ]);
 
-            if (statsData.success) {
+            // api-client returns response.data directly, so statsData = { success, data }
+            if (statsData?.success) {
                 setStats(statsData.data);
+            } else if (statsData?.data) {
+                setStats(statsData.data);
+            } else if (statsData?.total_complaints !== undefined) {
+                setStats(statsData); // already unwrapped
             }
 
-            if (complaintsData.success) {
-                const complaintsArray = Array.isArray(complaintsData.data) 
-                    ? complaintsData.data 
-                    : complaintsData.data.complaints || [];
-                setComplaints(complaintsArray.slice(0, 4));
-            }
+            const rawComplaints = complaintsData?.data || complaintsData?.complaints || complaintsData;
+            const complaintsArray = Array.isArray(rawComplaints) ? rawComplaints : [];
+            setComplaints(complaintsArray.slice(0, 4));
         } catch (error: any) {
             console.error('Error fetching dashboard data:', error);
             setError(error.message);
-            toast.error('Failed to load dashboard data');
         } finally {
             setLoading(false);
         }
@@ -70,7 +69,7 @@ function AdminDashboardContent() {
         );
     }
 
-    const totalComplaints = stats?.total_complaints || 0;
+    const totalComplaints = stats?.total_complaints || stats?.total || 0;
     const pendingComplaints = stats?.pending || 0;
     const resolvedComplaints = stats?.resolved || 0;
     const slaBreached = stats?.sla_breached || 0;

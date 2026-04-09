@@ -46,10 +46,10 @@ exports.createOfficer = async (req, res) => {
 
         // Insert officer
         const result = await pool.query(
-            `INSERT INTO officers (name, email, password_hash, department, role, mla_id, status, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, 'officer', $5, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            `INSERT INTO officers (name, email, password_hash, department, role, mla_id, constituency_id, status, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, 'officer', $5, $6, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
              RETURNING id, name, email, department, role, status, created_at`,
-            [name.trim(), email.toLowerCase().trim(), passwordHash, department.trim(), mlaUser.id || null]
+            [name.trim(), email.toLowerCase().trim(), passwordHash, department.trim(), mlaUser.id || null, mlaUser.constituency_id || null]
         );
 
         const officer = result.rows[0];

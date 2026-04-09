@@ -18,6 +18,9 @@ const adminRoutes = require('./routes/admin.routes');
 const mlaRoutes = require('./routes/mla.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const authRoutes = require('./routes/auth.routes');
+const superadminRoutes = require('./routes/superadmin.routes');
+const constituencyRoutes = require('./routes/constituency.routes');
+const superAdminRoutes = require('./routes/superadmin.routes');
 
 // Initialize Express app
 const app = express();
@@ -84,6 +87,9 @@ app.use(`/api/${apiVersion}/admin`, adminRoutes);
 app.use(`/api/${apiVersion}/mla`, mlaRoutes);
 app.use(`/api/${apiVersion}/upload`, uploadRoutes);
 app.use(`/api/${apiVersion}/auth`, authRoutes);
+app.use(`/api/${apiVersion}/superadmin`, superadminRoutes);
+app.use(`/api/${apiVersion}/constituencies`, constituencyRoutes);
+app.use(`/api/${apiVersion}/superadmin`, superAdminRoutes);
 
 // 404 handler
 app.use((req, res) => {

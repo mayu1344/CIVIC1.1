@@ -1,4 +1,4 @@
-const { pool } = require('../config/database');
+﻿const { pool } = require('../config/database');
 const logger = require('../utils/logger');
 const { AppError } = require('../middleware/error.middleware');
 const { renameCloudinaryFile } = require('../config/cloudinary');
@@ -195,11 +195,11 @@ exports.getAllComplaints = async (req, res, next) => {
         const query = `
             SELECT c.*, 
                    d.name as department_name,
-                   u.full_name as officer_name
+                   o.name as officer_name
             FROM complaints c
-            LEFT JOIN departments d ON c.assigned_department_id = d.id
-            LEFT JOIN officers o ON c.assigned_officer_id = o.id
-            LEFT JOIN users u ON o.user_id = u.id
+            LEFT JOIN departments d ON c.assigned_department_id::text = d.id::text
+            LEFT JOIN officers o ON c.assigned_officer_id::text = o.id::text
+            
             ${whereClause}
             ORDER BY c.created_at DESC
             LIMIT $${paramCount} OFFSET $${paramCount + 1}
@@ -267,13 +267,13 @@ exports.getComplaintById = async (req, res, next) => {
             SELECT c.*, 
                    d.name as department_name,
                    d.code as department_code,
-                   u.full_name as officer_name,
+                   o.name as officer_name,
                    u.mobile as officer_mobile,
                    o.employee_id as officer_employee_id
             FROM complaints c
-            LEFT JOIN departments d ON c.assigned_department_id = d.id
-            LEFT JOIN officers o ON c.assigned_officer_id = o.id
-            LEFT JOIN users u ON o.user_id = u.id
+            LEFT JOIN departments d ON c.assigned_department_id::text = d.id::text
+            LEFT JOIN officers o ON c.assigned_officer_id::text = o.id::text
+            
             WHERE c.id = $1 AND c.deleted_at IS NULL
         `;
 
@@ -325,12 +325,12 @@ exports.trackComplaint = async (req, res, next) => {
         const query = `
             SELECT c.*, 
                    d.name as department_name,
-                   u.full_name as officer_name,
+                   o.name as officer_name,
                    u.email as officer_email
             FROM complaints c
-            LEFT JOIN departments d ON c.assigned_department_id = d.id
-            LEFT JOIN officers o ON c.assigned_officer_id = o.id
-            LEFT JOIN users u ON o.user_id = u.id
+            LEFT JOIN departments d ON c.assigned_department_id::text = d.id::text
+            LEFT JOIN officers o ON c.assigned_officer_id::text = o.id::text
+            
             WHERE c.complaint_number = $1 AND c.deleted_at IS NULL
         `;
 
@@ -574,3 +574,5 @@ exports.getStats = async (req, res, next) => {
         next(error);
     }
 };
+
+

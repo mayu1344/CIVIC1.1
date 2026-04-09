@@ -52,7 +52,7 @@ const verifyMLA = async (req, res, next) => {
         }
 
         const result = await pool.query(
-            "SELECT id, email, role, full_name, status FROM users WHERE email = $1 AND role IN ('admin', 'mla') AND status = 'active'",
+            "SELECT id, email, role, full_name, status, constituency_id FROM users WHERE email = $1 AND role IN ('admin', 'mla') AND status = 'active'",
             [userEmail]
         );
 
